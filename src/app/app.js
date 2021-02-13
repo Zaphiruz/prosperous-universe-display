@@ -10,8 +10,8 @@ import './app.less';
 import Home from './pages/home/home';
 import Materials from './pages/materials/materials';
 
-export default function App() {
-	return <div className="App">
+export default App = () => (
+	<div className="App">
 		<Router>
 			<div>
 				<nav>
@@ -32,4 +32,4 @@ export default function App() {
 			</Switch>
 		</Router>
 	</div>
-}
+);
