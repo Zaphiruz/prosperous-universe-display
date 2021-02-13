@@ -10,7 +10,7 @@ import './app.less';
 import Home from './pages/home/home';
 import Materials from './pages/materials/materials';
 
-export default App = () => (
+export default () => (
 	<div className="App">
 		<Router>
 			<div>
