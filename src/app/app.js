@@ -2,29 +2,19 @@ import React from 'react';
 import {
 	BrowserRouter as Router,
 	Switch,
-	Route,
-	Link
+	Route
  } from "react-router-dom";
 import './app.less';
+
+import Nav from './partial/nav/nav';
 
 import Home from './pages/home/home';
 import Materials from './pages/materials/materials';
 
 export default () => (
-	<div className="App">
+	<div className="App w-full h-full min-h-screen min-w-full dark:bg-gray-900 dark:text-white">
 		<Router>
-			<div>
-				<nav>
-					<ul>
-						<li>
-							<Link to="/">Home</Link>
-						</li>
-						<li>
-							<Link to="/materials">Materials</Link>
-						</li>
-					</ul>
-				</nav>
-			</div>
+			<Nav />
 
 			<Switch>
 				<Route path="/" exact component={Home} />

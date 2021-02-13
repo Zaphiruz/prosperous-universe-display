@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { request, gql } from 'graphql-request'
+import { request, gql } from 'graphql-request';
 import './materials.less';
+
+import MaterialCard from './material-card';
 
 export default () => {
 
@@ -15,6 +17,7 @@ export default () => {
 			query {
 				materialMany {
 					name,
+					ticker
 					id,
 					weight,
 					volume,
@@ -24,35 +27,14 @@ export default () => {
 			  }
 			}
 		`);
-		console.log(query.materialMany);
 		setMaterials(query.materialMany);
 	}
 
 	return (
-		<div className='materials'>
-			<h1>Materials</h1>
-
-			<div class='grid grid-cols-2'>
+		<div className='materials container mx-auto'>
+			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
 				{materials.map(material => (
-					<div key={material.id} className='max-w-sm'>
-						<h3>{material.name} <small className='text-gray-500'>{material.id}</small></h3>
-						<div className='grid grid-flow-row grid-cols-2 gap-2'>
-							<dl>
-								<dt>weight</dt>
-								<dl>{material.weight}</dl>
-							</dl>
-
-							<dl>
-								<dt>volume</dt>
-								<dl>{material.volume}</dl>
-							</dl>
-
-							<dl>
-								<dt>category</dt>
-								<dl>{material.category?.name}</dl>
-							</dl>
-						</div>
-					</div>
+					<MaterialCard material={material} key={material.id} />
 				))}
 			</div>
 		</div>
