@@ -13,7 +13,7 @@ export default () => {
 	const [materials, setMaterials] = useState([]);
 
 	const fetchMaterials = async () => {
-		let query = await request('http://localhost:8000/graphql', gql`
+		let query = await request('https://api.prosperon.app/graphql', gql`
 			query {
 				materialMany {
 					name,
