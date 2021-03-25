@@ -19,7 +19,7 @@ export default ({ material }) => (
 
 		<dl>
 			<dt className='font-bold capitalize'>category:</dt>
-			<dl>{material.category?.name}</dl>
+			<dl>{startCase(material.category?.name)}</dl>
 		</dl>
 	</div>
 );
