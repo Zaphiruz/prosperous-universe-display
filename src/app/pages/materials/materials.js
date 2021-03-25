@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { request, gql } from 'graphql-request';
+import { query } from 'UTILS/graphql-query-helper';
 import './materials.less';
 
 import MaterialCard from './material-card';
+
+const materialQuery = {
+	name: true,
+	ticker: true,
+	id: true,
+	weight: true,
+	volume: true,
+	category: {
+		name: true
+	}
+}
 
 export default () => {
 
@@ -13,21 +24,8 @@ export default () => {
 	const [materials, setMaterials] = useState([]);
 
 	const fetchMaterials = async () => {
-		let query = await request('https://api.prosperon.app/graphql', gql`
-			query {
-				materialMany {
-					name,
-					ticker
-					id,
-					weight,
-					volume,
-					category {
-						 name
-					}
-			  }
-			}
-		`);
-		setMaterials(query.materialMany);
+		let materials = await query('https://api.prosperon.app/graphql', 'materialMany', null, materialQuery);
+		setMaterials(materials);
 	}
 
 	return (
