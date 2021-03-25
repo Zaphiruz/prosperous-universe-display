@@ -16,17 +16,16 @@ const materialQuery = {
 }
 
 export default () => {
-
-	useEffect(() => {
-		fetchMaterials();
-	}, [])
-
 	const [materials, setMaterials] = useState([]);
 
 	const fetchMaterials = async () => {
 		let materials = await query('https://api.prosperon.app/graphql', 'materialMany', null, materialQuery);
 		setMaterials(materials);
 	}
+
+	useEffect(() => {
+		fetchMaterials();
+	}, []);
 
 	return (
 		<div className='materials container mx-auto'>
