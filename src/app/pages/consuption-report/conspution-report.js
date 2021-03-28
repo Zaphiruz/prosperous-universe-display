@@ -5,6 +5,8 @@ import { toUpper, startCase } from 'lodash';
 import config from 'ROOT/config';
 import './consuption-report.less';
 
+import ConsumtionSite from './conspution-site';
+
 const CompanyQuery = {
 	id: true,
 	name: true,
@@ -26,23 +28,28 @@ const WorkForceQuery = {
 		capacity: true,
 		level: true,
 		population: true,
-		required: true,
+		reserve: true,
 		satisfaction: true,
 		needs: {
 			needs: {
 				essential: true,
 				material: {
+					id: true,
 					ticker: true,
 					name: true
-				}
+				},
+				unitsPer100: true
 			}
 		}
 	},
 	siteId: {
 		siteId: true,
 		address: {
-			name: true,
-			naturalId: true
+			type:true,
+			entity: {
+				name: true,
+				naturalId: true
+			}
 		}
 	}
 };
@@ -50,15 +57,19 @@ const WorkForceQuery = {
 const InventoryQuerys = {
 	type: true,
 	items: {
+		id: true,
 		quantity: {
 			amount: true,
 			material : {
+				id: true,
 				ticker: true, 
 				name: true,
 			}
 		}
 	},
-	addressableId: true
+	addressableId: {
+		siteId: true
+	}
 }
 
 export default () => {
@@ -66,6 +77,7 @@ export default () => {
 	let [ company, setCompany ] = useState({});
 	let [ workforces, setWorkforces ] = useState([]);
 	let [ inventories, setInventories ] = useState([]);
+	let [ reports, setReports ] = useState([]);
 
 	const fetchCompany = async () => {
 		let company = await query(config.api, 'companyOne', { code: toUpper(companyId) }, CompanyQuery);
@@ -84,14 +96,76 @@ export default () => {
 
 	const fetchInventories = async (company) => {
 		let ownerId = company.id;
-		let inventories = await query(config.api, 'storageMany', { owner: ownerId, type: "STORE" }, InventoryQuerys);
+		let inventories = await query(config.api, 'storageSiteMany', { owner: ownerId, type: "STORE" }, InventoryQuerys);
 		console.log('inventories', inventories)
 		setInventories(inventories);
 		return inventories;
 	}
 
 	const correlate = ([workforces, inventories]) => {
-		// debugger;
+		let pairs = workforces.map((workforce) => {
+			let siteId = workforce.siteId.siteId;
+			let inventory = inventories.find(inv => inv.addressableId.siteId === siteId);
+			return {
+				address: workforce.siteId.address,
+				siteId,
+				workforce,
+				inventory
+			}
+		});
+
+		return pairs;
+	}
+
+	const reportForLocation = ({ workforce, inventory, address, siteId }) => {
+		let workforces = workforce.workforces;
+		let needslists = workforces.map((force) => {
+			let population = force.population;
+
+			return force.needs.needs.map(need => {
+				let { essential, material, unitsPer100 } = need;
+				let unitsPerInterval = population * (unitsPer100 / 100);
+
+				return {
+					essential,
+					material,
+					unitsPerInterval
+				}
+			})
+		})
+
+		let masterNeedList = needslists.reduce((acc, needList) => {
+			for (let need of needList) {
+				if (need.unitsPerInterval === 0) continue;
+
+				let prevNeed = acc.find(prevNeed => prevNeed.material.id === need.material.id);
+				if (prevNeed) {
+					prevNeed.unitsPerInterval += need.unitsPerInterval;
+				} else {
+					acc.push(need);
+				}
+			}
+
+			return acc;
+		}, [])
+
+		let needs = masterNeedList.map((need) => {
+			let materialId = need.material.id;
+			let amountInInv = inventory?.items.find(item => item.id === materialId)?.quantity.amount || 0;
+			let intervalsSatisfied = amountInInv / need.unitsPerInterval;
+
+			return {
+				...need,
+				amountInInv,
+				intervalsSatisfied
+			}
+		})
+
+		return {
+			address,
+			siteId,
+			needs
+		}
 	}
 
 	useEffect(async () => {
@@ -100,14 +174,21 @@ export default () => {
 			fetchWorkforces(company),
 			fetchInventories(company)
 		]);
-
-		correlate(datas);
+			let reports = correlate(datas)
+				.map(reportForLocation)
+			setReports(reports);
 	}, []);
 
 	return (
-		<div className='consuption-report container mx-auto'>
+		<div className='consuption-report container mx-auto p-3'>
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>{toUpper(company?.code)}</small>
 			<h1 className='text-xl capitalize inline-block'>{startCase(company?.name)}</h1>
+
+			<div className=''>
+				{reports.map(site => (
+					<ConsumtionSite site={site} key={site.siteId} />
+				))}
+			</div>
 		</div>
 	);
 };
