@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-module.exports = {
+module.exports = config = {
   entry: "./src/index.js",
   mode: process.env.NODE_ENV || "development",
   module: {
@@ -26,6 +26,7 @@ module.exports = {
     extensions: ["*", ".js", ".jsx"],
     alias: {
       UTILS: path.resolve(__dirname, 'src/utils'),
+      ROOT: path.resolve(__dirname, 'src/'),
     }
   },
   output: {
@@ -40,6 +41,7 @@ module.exports = {
     hotOnly: true,
     historyApiFallback: true,
   },
+  devtool: 'eval-source-map',
   plugins: [
     new MiniCssExtractPlugin({
       filename: 'styles.css',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { query } from 'UTILS/graphql-query-helper';
+import config from 'ROOT/config';
 import './materials.less';
 
 import MaterialCard from './material-card';
@@ -19,7 +20,7 @@ export default () => {
 	const [materials, setMaterials] = useState([]);
 
 	const fetchMaterials = async () => {
-		let materials = await query('https://api.prosperon.app/graphql', 'materialMany', null, materialQuery);
+		let materials = await query(config.api, 'materialMany', null, materialQuery);
 		setMaterials(materials);
 	}
 
