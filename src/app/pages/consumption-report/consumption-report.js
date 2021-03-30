@@ -3,9 +3,9 @@ import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
 import { toUpper, startCase } from 'lodash';
 import config from 'ROOT/config';
-import './consuption-report.less';
+import './consumption-report.less';
 
-import ConsumtionSite from './conspution-site';
+import ConsumtionSite from './consumption-site';
 
 const CompanyQuery = {
 	id: true,

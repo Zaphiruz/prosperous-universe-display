@@ -1,7 +1,7 @@
 import React from 'react';
 import { startCase, isEmpty } from 'lodash'
 
-import ConsumtionNeed from './conspution-need';
+import ConsumptionNeed from './consumption-need';
 
 // TODO: pull into util for general use
 const getAddressStringFor = (addresses) => {
@@ -25,7 +25,7 @@ export default ({ site }) => {
 
 			<div>
 				{site.needs.map((need) => (
-					<ConsumtionNeed need={need} key={need.material.id} />
+					<ConsumptionNeed need={need} key={need.material.id} />
 				))}
 			</div>
 		</div>
