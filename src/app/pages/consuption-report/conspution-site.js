@@ -19,11 +19,11 @@ const getAddressStringFor = (addresses) => {
 
 export default ({ site }) => {
 	return (
-		<div className='bg-gray-400 dark:bg-gray-800 p-2 rounded-md'>
+		<div className='bg-gray-400 dark:bg-gray-800 p-2 rounded-md my-4'>
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>{site.siteId}</small>
 			<h3 className='text-lg capitalize inline-block'>{getAddressStringFor(site.address)}</h3>
 
-			<div>
+			<div className='grid grid-flow-row grid-cols-2 gap-2 mt-1'>
 				{site.needs.map((need) => (
 					<ConsumtionNeed need={need} key={need.material.id} />
 				))}
