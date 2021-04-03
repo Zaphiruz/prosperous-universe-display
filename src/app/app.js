@@ -10,7 +10,8 @@ import Nav from './partial/nav/nav';
 
 import Home from './pages/home/home';
 import Materials from './pages/materials/materials';
-import ConsputionReport from './pages/consuption-report/conspution-report';
+import ConsumptionReport from './pages/consumption-report/consumption-report';
+import ProductionReport from './pages/production-report/production-report';
 
 export default () => (
 	<div className="App w-full h-full min-h-screen min-w-full dark:bg-gray-900 dark:text-white">
@@ -20,7 +21,8 @@ export default () => (
 			<Switch>
 				<Route path="/" exact component={Home} />
 				<Route path="/materials" component={Materials} />
-				<Route path='/conspution-report/:companyId' component={ConsputionReport} />
+				<Route path='/consumption-report/:companyId' component={ConsumptionReport} />
+				<Route path='/production-report/:companyId' component={ProductionReport} />
 			</Switch>
 		</Router>
 	</div>
