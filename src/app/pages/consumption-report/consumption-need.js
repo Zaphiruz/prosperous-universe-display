@@ -22,19 +22,29 @@ export default ({ need }) => {
 	return (
 		<div className={`p-2 rounded-md ${getBgColors()}`}>
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>{need.material.ticker}</small>
-			<h4>{startCase(need.material.name)}</h4>
-			<dl>
-				<dt>Essential:</dt>
-				<dd>{String(need.essential)}</dd>
+			<h4 className='text-lg capitalize inline-block'>{startCase(need.material.name)}</h4>
+			
+			<dl className='lg:flex justify-between'>
+				<div className='m-1'>
+					<dt>Essential:</dt>
+					<dd>{String(need.essential)}</dd>
+				</div>
+				
+				<div className='m-1'>
+					<dt>Amount on Site:</dt>
+					<dd>{need.amountInInv}</dd>
+				</div>
 
-				<dt>Amount on Site:</dt>
-				<dd>{need.amountInInv}</dd>
+				<div className='m-1'>
+					<dt>Consumed per day:</dt>
+					<dd>{need.unitsPerInterval}</dd>
+				</div>
+				
 
-				<dt>Consumed per day:</dt>
-				<dd>{need.unitsPerInterval}</dd>
-
-				<dt>Days until hunger strikes:</dt>
-				<dd>{need.intervalsSatisfied.toFixed(2)}</dd>
+				<div className='m-1'>
+					<dt>Days until hunger strikes:</dt>
+					<dd>{need.intervalsSatisfied.toFixed(2)}</dd>
+				</div>
 			</dl>
 		</div>
 	)
