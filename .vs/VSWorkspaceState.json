@@ -5,10 +5,8 @@
     "\\src",
     "\\src\\app",
     "\\src\\app\\pages",
-    "\\src\\app\\pages\\consuption-report",
     "\\src\\app\\pages\\materials",
     "\\src\\utils"
   ],
-  "SelectedNode": "\\src\\app\\pages\\consuption-report\\conspution-report.js",
   "PreviewInSolutionExplorer": false
 }

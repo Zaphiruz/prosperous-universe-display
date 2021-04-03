@@ -13,6 +13,7 @@ import Materials from './pages/materials/materials';
 import ConsumptionReport from './pages/consumption-report/consumption-report';
 import ProductionReport from './pages/production-report/production-report';
 import ShippingCalc from './pages/shipping-calc/shipping-calc';
+import Planets from './pages/planets/planets';
 
 export default () => (
 	<div className="App w-full h-full min-h-screen min-w-full dark:bg-gray-900 dark:text-white">
@@ -25,6 +26,7 @@ export default () => (
 				<Route path='/consumption-report/:companyId' component={ConsumptionReport} />
 				<Route path='/production-report/:companyId' component={ProductionReport} />
 				<Route path='/shipping-calc' component={ShippingCalc} />
+				<Route path='/planets' component={Planets} />
 			</Switch>
 		</Router>
 	</div>
