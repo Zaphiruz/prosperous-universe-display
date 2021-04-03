@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
-import { toUpper, startCase } from 'lodash';
 import './shipping-calc.less';
 
 export default () => {
@@ -14,6 +12,11 @@ export default () => {
 	let [ itemList, setItemList ] = useState([]);
 	const maxVolume = 500;
 	const maxWeight = 500;
+
+	useEffect(() => {
+		console.log(itemList.length)
+		computeCurrentValues(itemList)
+	}, [itemList])
 
 	const addItem = async (e) => {
 		e.preventDefault();
@@ -40,12 +43,9 @@ export default () => {
 
 			itemList.push({ ticker: newMaterial, amount: parsedNewCount, weight, volume, material })
 		}
-		
-		computeCurrentValues(itemList);
 
-		setItemList(itemList);
-		setNewMaterial('');
-		setNewCount('');
+		setItemList([...itemList]);
+		clearInputs();
 	}
 
 	const computeCurrentValues = (itemLists) => {
@@ -66,16 +66,20 @@ export default () => {
 	const resetList = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		clearErrors();
 
-		computeCurrentValues([]);
+		clearErrors();
+		clearInputs();
+
 		setItemList([]);
-		setNewMaterial('');
-		setNewCount('');
 	}
 
 	const clearErrors = () => {
 		setError('');
+	}
+
+	const clearInputs = () => {
+		setNewMaterial('');
+		setNewCount('');
 	}
 
 	const renderErrorString = error
