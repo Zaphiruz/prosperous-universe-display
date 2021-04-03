@@ -10,6 +10,9 @@ export default () => (
 			<li>
 				<Link className='mx-2 font-bold' to="/materials">Materials</Link>
 			</li>
+			<li>
+				<Link className='mx-2 font-bold' to="/shipping-calc">Shipping Calc</Link>
+			</li>
 		</ul>
 	</nav>
 )
