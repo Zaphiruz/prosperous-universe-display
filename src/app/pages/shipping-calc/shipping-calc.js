@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
 import './shipping-calc.less';
@@ -6,8 +6,9 @@ import './shipping-calc.less';
 export default () => {
 	let [ currentWeight, setCurrentWeight ] = useState(0);
 	let [ currentVolume, setCurrentVolume ] = useState(0);
-	let [ newMaterial, setNewMaterial ] = useState('');
-	let [ newCount, setNewCount ] = useState('');
+	let newMaterial = useRef('');
+	let newCount = useRef('');
+
 	let [ error, setError ] = useState('');
 	let [ itemList, setItemList ] = useState([]);
 	const maxVolume = 500;
@@ -23,25 +24,26 @@ export default () => {
 		e.stopPropagation();
 		clearErrors();
 
-		let parsedNewCount = parseInt(newCount);
+		let addCount = parseInt(newCount.current.value);
+		let addMaterial = newMaterial.current.value;
 
-		let previousItem = itemList.find(item => item.ticker === newMaterial) 
+		let previousItem = itemList.find(item => item.ticker === addMaterial) 
 		if (previousItem) {
-			let count = previousItem.amount + parsedNewCount;
+			let count = previousItem.amount + addCount;
 
 			previousItem.amount = count
 			previousItem.weight = previousItem.material.weight * count;
 			previousItem.volume = previousItem.material.volume * count;
 		} else {
-			let material = await query(config.api, 'materialOne', { ticker: newMaterial }, { weight: true, volume: true });
+			let material = await query(config.api, 'materialOne', { ticker: addMaterial }, { weight: true, volume: true });
 			if(!material) {
 				return setError('No material Found')
 			}
 
-			let weight = material.weight * parsedNewCount;
-			let volume = material.volume * parsedNewCount;
+			let weight = material.weight * addCount;
+			let volume = material.volume * addCount;
 
-			itemList.push({ ticker: newMaterial, amount: parsedNewCount, weight, volume, material })
+			itemList.push({ ticker: addMaterial, amount: addCount, weight, volume, material })
 		}
 
 		setItemList([...itemList]);
@@ -78,8 +80,8 @@ export default () => {
 	}
 
 	const clearInputs = () => {
-		setNewMaterial('');
-		setNewCount('');
+		newMaterial.current.value = '';
+		newCount.current.value = '';
 	}
 
 	const renderErrorString = error
@@ -117,8 +119,7 @@ export default () => {
 								className='mr-2 text-black'
 								required="required"
 								pattern='[a-zA-Z0-9]{3}'
-								value={newMaterial}
-								onChange={(e) => {setNewMaterial(e.target.value)}}
+								ref={newMaterial}
 							/>
 						</label>
 
@@ -130,8 +131,7 @@ export default () => {
 								className='mr-2 text-black'
 								required="required"
 								pattern='\d+'
-								value={newCount}
-								onChange={(e) => {setNewCount(e.target.value)}}
+								ref={newCount}
 							/>
 						</label>
 
