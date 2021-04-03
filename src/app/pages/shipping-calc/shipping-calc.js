@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
+import { toUpper } from 'lodash';
 import './shipping-calc.less';
 
 export default () => {
@@ -34,7 +35,7 @@ export default () => {
 			previousItem.weight = previousItem.material.weight * count;
 			previousItem.volume = previousItem.material.volume * count;
 		} else {
-			let material = await query(config.api, 'materialOne', { ticker: addMaterial }, { weight: true, volume: true });
+			let material = await query(config.api, 'materialOne', { ticker: toUpper(addMaterial) }, { weight: true, volume: true });
 			if(!material) {
 				return setError('No material Found')
 			}
@@ -129,8 +130,10 @@ export default () => {
 								name='ticker'
 								className='mr-2 text-black'
 								required="required"
-								pattern='[a-zA-Z0-9]{3}'
+								pattern='[a-zA-Z0-9]{1,3}'
 								ref={newMaterial}
+								placeholder='i.e. RAT'
+								title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
 							/>
 						</label>
 
@@ -143,6 +146,8 @@ export default () => {
 								required="required"
 								pattern='\d+'
 								ref={newCount}
+								placeholder='i.e. 100'
+								title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
 							/>
 						</label>
 
