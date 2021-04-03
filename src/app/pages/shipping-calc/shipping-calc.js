@@ -15,7 +15,6 @@ export default () => {
 	const maxWeight = 500;
 
 	useEffect(() => {
-		console.log(itemList.length)
 		computeCurrentValues(itemList)
 	}, [itemList])
 
@@ -50,16 +49,22 @@ export default () => {
 		clearInputs();
 	}
 
+	const removeItem = (i, e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		clearErrors();
+
+		itemList.splice(i, 1);
+
+		setItemList([...itemList]);
+	}
+
 	const computeCurrentValues = (itemLists) => {
 		let { currentWeight, currentVolume } = itemLists.reduce((acc, {weight, volume}) => {
 			acc.currentWeight += parseFloat(weight);
 			acc.currentVolume += parseFloat(volume);
-
-			console.log(acc);
 			return acc;
 		}, {currentWeight: 0, currentVolume: 0});
-
-		console.log(currentWeight, currentVolume);
 
 		setCurrentWeight(currentWeight);
 		setCurrentVolume(currentVolume);
@@ -98,7 +103,13 @@ export default () => {
 					<ul>
 						{itemList.map((listItem, i) => (
 							<li key={i}>
-								{listItem.amount}x {listItem.ticker} - {listItem.volume.toFixed(2)}m<sup>3</sup> {listItem.weight.toFixed(2)}t
+								{listItem.amount}x {listItem.ticker} -
+								{listItem.volume.toFixed(2)}m<sup>3</sup> {listItem.weight.toFixed(2)}t
+								<button type='button'
+									onClick={(e) => removeItem(i, e)}
+								>
+									<span className="material-icons ml-2 text-red-500 dark:text-red-700 text-sm">clear</span>
+								</button>
 							</li>
 						))}
 					</ul>
