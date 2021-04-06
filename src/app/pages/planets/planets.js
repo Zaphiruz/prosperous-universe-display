@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
 import { toUpper, startCase, uniq, flatMap, localeCompare } from 'lodash';
@@ -78,7 +78,7 @@ export default () => {
 
 	const fetchPlanets = async () => {
 		console.log("About to query");
-		let planets = await query(config.api, 'planetMany', {}, PlanetQuery);
+		let planets = await query(config.api, 'planetMany', {}, PlanetQuery);	//planetMany
 		planets = planets.filter((planet) => !!planet.data.resources.length);
 		setPlanets(planets);
 		return planets;
@@ -97,13 +97,24 @@ export default () => {
 
 	const handleTierSearchChange = event => {
 		setFilterPlanetTier(event.target.value);
+		console.log(event.target.value);
 	};
 
 	const handleFertilitySearchChange = event => {
 		setFertility(parseFloat(event.target.value));
 	};
 
+	const onSubmitClick = async (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		console.log("!");
+	};
+
 	React.useEffect(() => {
+
+		//let planets = await query(config.api, 'planetMany', { filterMaterial }, PlanetQuery);
+		planets = planets.filter((planet) => !!planet.data.resources.length);
 		let filteredPlanetsSet = planets;
 
 		// Material Filter
@@ -140,29 +151,39 @@ export default () => {
 			<h1 className='text-xl capitalize inline-block'>Planets --- page loading...</h1>
 
 			<div>
-				<label>
-					<strong> Filter:</strong>
-					<select className="text-black" onChange={ handleMaterialSearchChange }>
-						<option key="All" value="">All</option>
-						{resourcesUnique.map(mat => (
-							<option key={mat} value={mat}> {mat} </option>
-						))}
-					</select>
+				<form onSubmit={onSubmitClick}>
+					<label>
+						<strong> Filter:</strong>
+						<select className="text-black" id='materialFilter' onChange={handleMaterialSearchChange}>
+							{resourcesUnique.map(mat => (
+								<option key={mat} value={mat}> {mat} </option>
+							))}
+						</select>
 
-					<strong> Planet Tier: </strong>
-					<select className="text-black" onChange={handleTierSearchChange}>
-						<option key="all" value="">All</option>
-						<option key="0" value="0">0</option>
-						<option key="1" value="1">1</option>
-						<option key="2" value="2">2</option>
-						<option key="3" value="3">3</option>
-					</select>
-					
-					<strong> Fertility </strong>
-					<select className="text-black" onChange={handleFertilitySearchChange }>
-						<option key="tmp" value="tmp">tmp</option>
-					</select>
-				</label>
+						<strong> Planet Tier: </strong>
+						<select className="text-black" id='tierFilter' onChange={handleTierSearchChange}>
+							<option key="3" value="3">3</option>
+							<option key="2" value="2">2</option>
+							<option key="1" value="1">1</option>
+							<option key="0" value="0">0</option>
+						</select>
+
+						<strong> Fertility </strong>
+						<input type='text'
+							id='fertilityFilter'
+							name='fertilityFilter'
+							className='mr-2 text-black'
+							pattern='\d+'
+							placeholder='-1'
+							title="Fertility should be a number between 0 and 1. -1 is for all."
+						/>
+					</label>
+
+					<button type='submit'>
+						<span className="material-icons">add_circle_outline</span>
+					</button>
+				</form>
+
 			</div>
 
 			<div className=''>

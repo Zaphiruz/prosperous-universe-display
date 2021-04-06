@@ -9,6 +9,10 @@ export function query(url, method, filter, body) {
 	return request(url, queryString).then(data => data[method]);
 }
 
+//export function queryLarge(url, method, filter, body) {
+
+//}
+
 function _makeFilterString(filter) {
 	let filterArray = [];
 	if (filter) {
