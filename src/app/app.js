@@ -16,7 +16,7 @@ import ShippingCalc from './pages/shipping-calc/shipping-calc';
 import Planets from './pages/planets/planets';
 
 export default () => (
-	<div className="App w-full h-full min-h-screen min-w-full dark:bg-gray-900 dark:text-white">
+	<div className="app w-full h-full min-h-screen min-w-full dark:bg-gray-900 dark:text-white">
 		<Router>
 			<Nav />
 

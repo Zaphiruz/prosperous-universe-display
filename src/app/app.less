@@ -3,5 +3,12 @@
 @tailwind utilities;
 
 .app {
-
+	a:focus,
+	input:focus,
+	button:focus {
+		outline: none;
+	}
 }
+
+@import './styles/forms.less';
+@import './styles/tables.less';

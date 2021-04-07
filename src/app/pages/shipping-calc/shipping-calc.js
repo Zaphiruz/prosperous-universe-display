@@ -4,6 +4,8 @@ import config from 'ROOT/config';
 import { toUpper } from 'lodash';
 import './shipping-calc.less';
 
+import Button from 'COMPONENTS/button';
+
 export default () => {
 	let [ currentWeight, setCurrentWeight ] = useState(0);
 	let [ currentVolume, setCurrentVolume ] = useState(0);
@@ -18,6 +20,10 @@ export default () => {
 	useEffect(() => {
 		computeCurrentValues(itemList)
 	}, [itemList])
+
+	useEffect(() => {
+		newMaterial.current.focus();
+	 }, []);
 
 	const addItem = async (e) => {
 		e.preventDefault();
@@ -43,11 +49,12 @@ export default () => {
 			let weight = material.weight * addCount;
 			let volume = material.volume * addCount;
 
-			itemList.push({ ticker: addMaterial, amount: addCount, weight, volume, material })
+			itemList.push({ ticker: toUpper(addMaterial), amount: addCount, weight, volume, material })
 		}
 
 		setItemList([...itemList]);
 		clearInputs();
+		newMaterial.current.focus();
 	}
 
 	const removeItem = (i, e) => {
@@ -98,89 +105,129 @@ export default () => {
 		<div className='shipping-calc container mx-auto p-3'>
 			<h1 className='text-xl capitalize inline-block'>Shipping Calculator</h1>
 
-			<div className='flex'>
-				<div className='w-4/5'>
-					<h3>List</h3>
-					<ul>
-						{itemList.map((listItem, i) => (
-							<li key={i}>
-								{listItem.amount}x {listItem.ticker} -
-								{listItem.volume.toFixed(2)}m<sup>3</sup> {listItem.weight.toFixed(2)}t
-								<button type='button'
-									onClick={(e) => removeItem(i, e)}
-								>
-									<span className="material-icons ml-2 text-red-500 dark:text-red-700 text-sm">clear</span>
-								</button>
-							</li>
-						))}
-					</ul>
-					<button type='button'
-						onClick={resetList}
-					>
-						Reset
-					</button>
-
-					{renderErrorString}
-					
+			<div className='lg:flex'>
+				<div className='w-4/5 lg:mr-4'>
 					<form onSubmit={addItem}>
-						<label>
-							Ticker
-							<input type='text'
-								id='ticker'
-								name='ticker'
-								className='mr-2 text-black'
-								required="required"
-								pattern='[a-zA-Z0-9]{1,3}'
-								ref={newMaterial}
-								placeholder='i.e. RAT'
-								title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
-							/>
-						</label>
+						<table>
+							<thead>
+								<tr>
+									<th>Ticker</th>
+									<th>Amount</th>
+									<th>Weight (t)</th>
+									<th>Volume (m<sup>3</sup>)</th>
+									<th>&nbsp;</th>
+								</tr>
+							</thead>
 
-						<label>
-							Count
-							<input type='text'
-								id='count'
-								name='count'
-								className='mr-2 text-black'
-								required="required"
-								pattern='\d+'
-								ref={newCount}
-								placeholder='i.e. 100'
-								title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
-							/>
-						</label>
+							<tbody>
+								{itemList.map((listItem, i) => (
+									<tr key={listItem.ticker}>
+										<td>{listItem.ticker}</td>
+										<td>{listItem.amount}</td>
+										<td>{listItem.weight.toFixed(2)}</td>
+										<td>{listItem.volume.toFixed(2)}</td>
+										<td>
+											<Button type='button'
+												className='bg-red-500 dark:bg-red-700 flex justify-center items-center'
+												size='sm'
+												onClick={(e) => removeItem(i, e)}
+											>
+												<span className="material-icons text-sm">clear</span>
+											</Button>
+										</td>
+									</tr>
+								))}
+							</tbody>
 
-						<button type='submit'>
-							<span className="material-icons">add_circle_outline</span>
-						</button>
+							<tfoot className='divide-y divide-blue-700 divide-opacity-30'>
+								<tr>
+									<td>
+										<input type='text'
+											tabIndex="1"
+											id='ticker'
+											name='ticker'
+											className='mr-2'
+											required="required"
+											pattern='[a-zA-Z0-9]{1,3}'
+											ref={newMaterial}
+											placeholder='i.e. RAT'
+											title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
+										/>
+									</td>
+									<td>
+										<input type='text'
+											tabIndex="2"
+											id='count'
+											name='count'
+											className='mr-2'
+											required="required"
+											pattern='\d+'
+											ref={newCount}
+											placeholder='i.e. 100'
+											title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
+										/>
+									</td>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>
+										<Button type='submit' tabIndex="3" className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100'>
+											<span className="material-icons">add</span> Add Line
+										</Button>
+									</td>
+								</tr>
+
+								<tr>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>
+										<Button type='button'
+											className='bg-red-500 dark:bg-red-700'
+											onClick={resetList}
+										>
+											Reset
+										</Button>
+									</td>
+								</tr>
+							</tfoot>
+						</table>
 					</form>
 
-					
+					{renderErrorString}
 				</div>
 				
-				<dl className='flex'>
-					<div>
-						<dt><h3>Weight</h3></dt>
-						<dd>
-							<ul className='list-none'>
-								<li>Current: {currentWeight.toFixed(2)}</li>
-								<li>Max: {maxWeight.toFixed(2)}</li>
-								<li className={maxWeight - currentWeight < 0 ? 'text-red-500 dark:text-red-700' : ''}>Total: {(maxWeight - currentWeight).toFixed(2)}</li>
-							</ul>
-						</dd>
-					</div>
+				<dl>
+					<table>
+						<thead>
+							<tr>
+								<th>&nbsp;</th>
+								<th>Weight</th>
+								<th>Volume</th>
+							</tr>
+						</thead>
 
-					<div className='ml-4'>
-						<dt><h3>Volume</h3></dt>
-						<dd>
-							<ul className='list-none'>
-								<li>Current: {currentVolume.toFixed(2)}</li>
-								<li>Max: {maxVolume.toFixed(2)}</li>
-								<li className={maxVolume - currentVolume < 0 ? 'text-red-500 dark:text-red-700' : ''}>Total: {(maxVolume - currentVolume).toFixed(2)}</li>
-							</ul>
-						</dd>
-					</div>
+						<tbody>
+							<tr>
+								<td>Current</td>
+								<td>{currentWeight.toFixed(2)}</td>
+								<td>{currentVolume.toFixed(2)}</td>
+							</tr>
+							<tr>
+								<td>Max</td>
+								<td>{maxWeight.toFixed(2)}</td>
+								<td>{maxVolume.toFixed(2)}</td>
+							</tr>
+						</tbody>
+
+						<tfoot>
+							<tr>
+								<td>Total</td>
+								<td className={maxWeight - currentWeight < 0 ? 'text-red-500 dark:text-red-700' : ''}>{(maxWeight - currentWeight).toFixed(2)}</td>
+								<td className={maxVolume - currentVolume < 0 ? 'text-red-500 dark:text-red-700' : ''}>{(maxVolume - currentVolume).toFixed(2)}</td>
+							</tr>
+						</tfoot>
+					</table>
 				</dl>
 			</div>
 		</div>

@@ -26,6 +26,7 @@ module.exports = config = {
     extensions: ["*", ".js", ".jsx"],
     alias: {
       UTILS: path.resolve(__dirname, 'src/utils'),
+      COMPONENTS: path.resolve(__dirname, 'src/app/components'),
       ROOT: path.resolve(__dirname, 'src/'),
     }
   },
