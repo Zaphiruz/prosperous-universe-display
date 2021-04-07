@@ -1,12 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\src",
     "\\src\\app",
     "\\src\\app\\pages",
+    "\\src\\app\\pages\\consumption-report",
     "\\src\\app\\pages\\materials",
+    "\\src\\app\\pages\\planets",
+    "\\src\\app\\pages\\production-report",
+    "\\src\\app\\pages\\shipping-calc",
     "\\src\\utils"
   ],
+  "SelectedNode": "\\src\\app\\pages\\planets\\planets.js",
   "PreviewInSolutionExplorer": false
 }
