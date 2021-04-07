@@ -66,6 +66,12 @@ const PlanetQuery = {
     }
 };
 
+const MaterialQuery = {
+	id: true,
+	ticker: true,
+	name: true
+};
+
 export default () => {
 	console.log("Loading page...");
 
@@ -75,6 +81,9 @@ export default () => {
 	let [planetResults, setPlanetResults] = useState([]);
 	let [filterPlanetTier, setFilterPlanetTier] = useState('');
 	let [filterFertility, setFertility] = useState(-1);
+	let materialFilterRef = useRef('');
+	let tierFilterRef = useRef('');
+	let fertilityFilterRef = useRef('');
 
 	const fetchPlanets = async () => {
 		console.log("About to query");
@@ -91,58 +100,24 @@ export default () => {
 
 	const resourcesUnique = _.uniq(_.flatMap(planets.map((planet) => planet.data.resources.map((resource) => resource.material.ticker)))).sort(function (a, b) { return a.localeCompare(b) });
 
-	const handleMaterialSearchChange = event => {
-		setFilterMaterial(event.target.value);
-	};
-
-	const handleTierSearchChange = event => {
-		setFilterPlanetTier(event.target.value);
-		console.log(event.target.value);
-	};
-
-	const handleFertilitySearchChange = event => {
-		setFertility(parseFloat(event.target.value));
-	};
-
 	const onSubmitClick = async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		console.log("!");
+		let newMaterialFilter = toUpper(materialFilterRef.current.value);
+		let newFertilityFilter = fertilityFilterRef.current.value;
+		let newTierFilter = parseInt(tierFilterRef.current.value);
+
+		console.log(newMaterialFilter, newTierFilter);
+
+		let mat = await query(config.api, 'materialOne', { ticker: newMaterialFilter }, MaterialQuery);
+		console.log(mat);
+		let filteredPlanets = await query(config.api, 'planetMany', { materials: [mat.id], tier: {planetTier: newTierFilter} }, PlanetQuery);
+
+		console.log(filteredPlanets);
+
+		setPlanetResults(filteredPlanets);
 	};
-
-	React.useEffect(() => {
-
-		//let planets = await query(config.api, 'planetMany', { filterMaterial }, PlanetQuery);
-		planets = planets.filter((planet) => !!planet.data.resources.length);
-		let filteredPlanetsSet = planets;
-
-		// Material Filter
-		if (filterMaterial) {
-			filteredPlanetsSet = filteredPlanetsSet.filter(planet =>
-				planet.data.resources.some(mat =>
-					mat.material.ticker === filterMaterial)
-			).sort(function (a, b) {
-				return b.data.resources.find(resource => resource.material.ticker === filterMaterial).factor - a.data.resources.find(resource => resource.material.ticker === filterMaterial).factor
-			});
-		}
-
-		// filter by fertility
-		if (filterFertility != -1) {
-			filteredPlanetsSet = filteredPlanetsSet.filter(planet =>
-				planet.data.fertility >= filterFertility);
-        }
-
-		// filter by planet tier
-		if (filterPlanetTier != 0) {
-			filteredPlanetsSet = filteredPlanetsSet.filter(planet =>
-				planet.tier.planetTier >= filterPlanetTier);
-        }
-
-		setPlanetResults(filteredPlanetsSet);
-
-	}, [filterMaterial, filterPlanetTier, filterFertility]);
-
 
 	// Show what would take to build on the planet
 
@@ -154,14 +129,19 @@ export default () => {
 				<form onSubmit={onSubmitClick}>
 					<label>
 						<strong> Filter:</strong>
-						<select className="text-black" id='materialFilter' onChange={handleMaterialSearchChange}>
-							{resourcesUnique.map(mat => (
-								<option key={mat} value={mat}> {mat} </option>
-							))}
-						</select>
+						<input type='text'
+							id='materialFilter'
+							name='materialFilter'
+							ref={materialFilterRef}
+							className="mr-2 text-black"
+							pattern='[a-zA-Z0-9]{1,3}'
+							required="required"
+							placeholder='i.e. RAT'
+							title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
+						/>
 
 						<strong> Planet Tier: </strong>
-						<select className="text-black" id='tierFilter' onChange={handleTierSearchChange}>
+						<select className="text-black" id='tierFilter' ref={ tierFilterRef }>
 							<option key="3" value="3">3</option>
 							<option key="2" value="2">2</option>
 							<option key="1" value="1">1</option>
@@ -174,7 +154,8 @@ export default () => {
 							name='fertilityFilter'
 							className='mr-2 text-black'
 							pattern='\d+'
-							placeholder='-1'
+							placeholder='0-1, leave blank if all'
+							ref={fertilityFilterRef}
 							title="Fertility should be a number between 0 and 1. -1 is for all."
 						/>
 					</label>
