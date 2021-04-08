@@ -21,20 +21,20 @@ const PlanetQuery = {
         }
 	},
 	//celestialBodies: [],		// Errors out
-	cogcId: true,
-	country: true,
-	currency: true,
+	//cogcId: true,
+	//country: true,
+	//currency: true,
 	data: {					// Errors out
 		fertility: true,
 		gravity: true,
-		magneticField: true,
-		mass: true,
-		massEarth: true,
-		orbitIndex: true,
+		//magneticField: true,
+		//mass: true,
+		//massEarth: true,
+		//orbitIndex: true,
 		plots: true,
 		pressure: true,
-		radiation: true,
-		radius: true,
+		//radiation: true,
+		//radius: true,
 		resources: {
 			factor: true,
 			type: true,
@@ -44,17 +44,17 @@ const PlanetQuery = {
 				name: true
 			}
 		},
-		sunlight: true,
-		surface: true,
+		//sunlight: true,
+		//surface: true,
 		temperature: true,
 		takenPlots: true
 	},
 	governor: true,
 	id: true,
 	name: true,
-	nameable: true,
-	namer: true,
-	namingDate: true,
+	//nameable: true,
+	//namer: true,
+	//namingDate: true,
 	naturalId: true,
 	planetId: true,
 	populationId: true,
@@ -63,6 +63,17 @@ const PlanetQuery = {
 		pressure: true,
 		temperature: true,
 		planetTier: true
+	},
+	systemId: {
+		name: true,
+		sectorId: true,
+		systemId: true,
+		distances: {
+			toMoria: true,
+			toBenten: true,
+			toHortus: true,
+			toAntares: true,
+        }
     }
 };
 
@@ -84,10 +95,13 @@ export default () => {
 	let materialFilterRef = useRef('');
 	let tierFilterRef = useRef('');
 	let fertilityFilterRef = useRef('');
+	let distanceFilterRef = useRef('');
+	let targetFilterRef = useRef('');
 
 	const fetchPlanets = async () => {
 		console.log("About to query");
 		let planets = await query(config.api, 'planetMany', {}, PlanetQuery);	//planetMany
+		console.log(planets)
 		planets = planets.filter((planet) => !!planet.data.resources.length);
 		setPlanets(planets);
 		return planets;
@@ -108,11 +122,15 @@ export default () => {
 		let newFertilityFilter = fertilityFilterRef.current.value;
 		let newTierFilter = parseInt(tierFilterRef.current.value);
 
-		console.log(newMaterialFilter, newTierFilter);
+		let ferilityQuery = (newFertilityFilter === "") ? undefined : { fertility: { lte: parseFloat(newFertilityFilter) } };
+
+		console.log(newMaterialFilter, newTierFilter, newFertilityFilter);
 
 		let mat = await query(config.api, 'materialOne', { ticker: newMaterialFilter }, MaterialQuery);
 		console.log(mat);
-		let filteredPlanets = await query(config.api, 'planetMany', { materials: [mat.id], tier: {planetTier: newTierFilter} }, PlanetQuery);
+		let filteredPlanets = await query(config.api, 'planetMany', { materials: [mat.id], tier: { planetTier: newTierFilter }, data: ferilityQuery }, PlanetQuery);
+
+		// TODO: Sort, Less than/Greater than, Pagination
 
 		console.log(filteredPlanets);
 
@@ -149,15 +167,35 @@ export default () => {
 						</select>
 
 						<strong> Fertility </strong>
-						<input type='text'
+						<input type='number'
 							id='fertilityFilter'
+							step="any"
 							name='fertilityFilter'
 							className='mr-2 text-black'
-							pattern='\d+'
 							placeholder='0-1, leave blank if all'
 							ref={fertilityFilterRef}
 							title="Fertility should be a number between 0 and 1. -1 is for all."
 						/>
+
+						<strong> Max Distance </strong>
+						<input type='number'
+							id='fertilityFilter'
+							step="1"
+							name='distanceFilter'
+							className='mr-2 text-black'
+							placeholder='Whole number: 1, 2, 3'
+							ref={distanceFilterRef}
+							title="Distance needs to be a whole number."
+						/>
+
+						<strong> Target </strong>
+						<select className="text-black" id='targetFilter' ref={targetFilterRef}>
+							<option key="Moria" value="Moria">Moria</option>
+							<option key="Hortus" value="Hortus">Hortus</option>
+							<option key="Benten" value="Benten">Benten</option>
+							<option key="Antares" value="Antares">Antares</option>
+						</select>
+
 					</label>
 
 					<button type='submit'>

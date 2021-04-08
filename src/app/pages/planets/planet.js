@@ -21,7 +21,8 @@ export default ({ planet }) => {
 			<h3 className='text-lg capitalize inline-block'>{(planet.tier.pressure === -1) ? "Low" : ((planet.tier.pressure === 1) ? "High" : "Normal")}</h3>
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>Temperature</small>
 			<h3 className='text-lg capitalize inline-block'>{(planet.tier.temperature === -1) ? "Low" : ((planet.tier.temperature === 1) ? "High" : "Normal")}</h3>
-
+			<small className='text-gray-500 dark:text-gray-400 mr-2'>Distance to Moria</small>
+			<h3 className='text-lg capitalize inline-block'>{(planet.systemId) ? planet.systemId.distances.toMoria : ""}</h3>
 			<div>
 				{planet.data.resources.map((resource) => (
 					<PlanetMat resource={resource} key={planet.naturalId + "." + resource.material.ticker} />

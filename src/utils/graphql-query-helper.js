@@ -22,10 +22,13 @@ function _makeFilterString(filter) {
 					return `${key}: [${value.map(v => `"${v}"`).join(',')}],`;
 
 				case typeof (value) === 'object':
-					return `${key}: { ${Object.entries(value).map(thingToString).join('')} }`
+					return `${key}: { ${Object.entries(value).map(thingToString).join('')} },`
 
 				case typeof (value) === 'number':
 					return `${key}: ${value},`
+
+				case typeof (value) === 'undefined':
+					return;
 
 				default:
 					return `${key}: "${value}",`
