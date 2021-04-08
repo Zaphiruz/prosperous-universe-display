@@ -14,6 +14,10 @@ label {
 		width: .25em;
 	}
 }
+label + input,
+label + select {
+	@apply ml-2;
+}
 
 input {
 	@apply bg-transparent border-b-2 border-blue-700 border-opacity-30;
@@ -21,6 +25,15 @@ input {
 input:focus,
 input:active {
 	@apply border-opacity-100;
+}
+
+select {
+	@apply bg-transparent border-b-2 border-blue-700 border-opacity-30;
+
+	option:checked {
+		background: inherit;
+		color: inherit;
+	}
 }
 
 fieldset {

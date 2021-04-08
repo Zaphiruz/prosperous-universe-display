@@ -8,7 +8,7 @@ export default () => (
 				<Link className='mx-2 font-bold' to="/">Home</Link>
 			</li>
 			<li>
-				<Link className='mx-2 font-bold' to="/materials">Materials</Link>
+				<Link className='mx-2 font-bold' to="/consumption-report">Consumption Report</Link>
 			</li>
 			<li>
 				<Link className='mx-2 font-bold' to="/shipping-calc">Shipping Calc</Link>

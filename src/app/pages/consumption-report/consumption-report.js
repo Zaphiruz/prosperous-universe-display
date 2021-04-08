@@ -6,6 +6,7 @@ import config from 'ROOT/config';
 import './consumption-report.less';
 
 import ConsumtionSite from './consumption-site';
+import Loading from 'COMPONENTS/loading';
 
 const CompanyQuery = {
 	id: true,
@@ -184,11 +185,15 @@ export default () => {
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>{toUpper(company?.code)}</small>
 			<h1 className='text-xl capitalize inline-block'>{startCase(company?.name)}</h1>
 
-			<div>
-				{reports.map(site => (
-					<ConsumtionSite site={site} key={site.siteId} />
-				))}
-			</div>
+			{reports.length && (
+				<div>
+					{reports.map(site => (
+						<ConsumtionSite site={site} key={site.siteId} />
+					))}
+				</div>
+			) || (
+				<Loading />
+			)}
 		</div>
 	);
 };
