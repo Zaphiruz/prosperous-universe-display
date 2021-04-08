@@ -23,7 +23,6 @@ export default () => (
 
 			<Switch>
 				<Route path="/" exact component={Home} />
-				<Route path="/materials" component={Materials} />
 				<Route path='/consumption-report' exact component={CompanyPicker} />
 				<Route path='/consumption-report/:companyId' component={ConsumptionReport} />
 				<Route path='/production-report/:companyId' component={ProductionReport} />
