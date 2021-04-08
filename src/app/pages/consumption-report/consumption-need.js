@@ -6,22 +6,22 @@ export default ({ need }) => {
 	const getBgColors = () => {
 		switch(true) {
 			case need.intervalsSatisfied < 1:
-				return `bg-red-700 dark:bg-red-900`;
+				return `bg-red-700 dark:bg-red-900 bg-opacity-30 dark:bg-opacity-80`;
 
 			case need.intervalsSatisfied < 3:
-				return `bg-yellow-400 dark:bg-yellow-700`;
+				return `bg-yellow-400 dark:bg-yellow-700 bg-opacity-30 dark:bg-opacity-80`;
 
 			case need.intervalsSatisfied > 5:
-				return `bg-green-400 dark:bg-green-700`;
+				return `bg-green-400 dark:bg-green-700 bg-opacity-30 dark:bg-opacity-80`;
 			
 			default:
-				return `bg-gray-400 dark:bg-gray-800`
+				return `bg-gray-500 dark:bg-gray-700 bg-opacity-30 dark:bg-opacity-80`
 		}
 	}
 
 	return (
 		<div className={`p-2 rounded-md ${getBgColors()}`}>
-			<small className='text-gray-500 dark:text-gray-400 mr-2'>{need.material.ticker}</small>
+			<small className='text-gray-500 dark:text-gray-300 mr-2'>{need.material.ticker}</small>
 			<h4 className='text-lg capitalize inline-block'>{startCase(need.material.name)}</h4>
 			
 			<dl className='lg:flex justify-between'>
