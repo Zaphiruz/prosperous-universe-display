@@ -229,10 +229,15 @@ export default () => {
 				inventory,
 			};
 		});
+
+		console.log("pairs",pairs);
+
 		return pairs;
 	};
 
 	const reportForLocation = ({ site, siteId, productionLine, inventory }) => {
+
+		
 
 		return {
 			siteId,
@@ -256,7 +261,13 @@ export default () => {
 
 	return (
 		<div className='consuption-report container mx-auto p-3'>
-			<h1 className='text-xl capitalize inline-block'>Production report - page loading...</h1>
+			<div>
+				<h1 className='text-xl capitalize inline-block'>Production report - page loading...</h1>
+			</div>
+
+			<div>
+				<small>Please note: This is only working on reoccuring orders only at the moment...</small>
+			</div>
 
 			<div>
 				{reports.map(site => (
