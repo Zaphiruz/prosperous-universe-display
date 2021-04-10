@@ -1,5 +1,5 @@
 import React from 'react';
-import { startCase } from 'lodash'
+import { capitalize } from 'lodash'
 
 
 export default ({ resource }) => {
@@ -8,7 +8,7 @@ export default ({ resource }) => {
 
     return (
         <div className={'p-2 rounded-md bg-gray-400 dark:bg-gray-800'}>
-            <h4>{startCase(resource.material.ticker)} - { startCase(resource.material.name) } - Daily Amount: { resourceAmount.toFixed(2) } </h4>
+            <h4>{capitalize(resource.material.ticker)} - { capitalize(resource.material.name) } - Daily Amount: { resourceAmount.toFixed(2) } </h4>
         </div>
     )
 }

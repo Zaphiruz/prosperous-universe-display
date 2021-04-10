@@ -1,5 +1,5 @@
 import React from 'react';
-import { startCase } from 'lodash'
+import { capitalize } from 'lodash'
 
 export default ({ line }) => {
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { startCase, isEmpty } from 'lodash'
+import { capitalize, isEmpty } from 'lodash'
 
 import ProductionLine from './production-line';
 
@@ -12,8 +12,8 @@ const getAddressStringFor = (addresses) => {
 	let system = addresses.find(entity => entity.type === 'SYSTEM');
 
 	return planet?.entity.name
-		? startCase(planet?.entity.name) + " - " + startCase(system?.entity.name || system?.entity.naturalId)
-		: startCase(planet?.entity.naturalId || system?.entity.naturalId)
+		? capitalize(planet?.entity.name) + " - " + capitalize(system?.entity.name || system?.entity.naturalId)
+		: capitalize(planet?.entity.naturalId || system?.entity.naturalId)
 }
 
 export default ({ site }) => {

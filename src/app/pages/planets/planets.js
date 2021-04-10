@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
-import { toUpper, startCase, uniq, flatMap, localeCompare } from 'lodash';
+import { toUpper, capitalize, uniq, flatMap, localeCompare } from 'lodash';
 import config from 'ROOT/config';
 import './planets.less';
 
