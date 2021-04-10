@@ -4,13 +4,13 @@
     "\\src",
     "\\src\\app",
     "\\src\\app\\pages",
-    "\\src\\app\\pages\\planets",
+    "\\src\\app\\pages\\consumption-report",
+    "\\src\\app\\pages\\materials",
     "\\src\\app\\pages\\production-report",
-    "\\src\\app\\pages\\shipping-calc",
     "\\src\\app\\partial",
     "\\src\\app\\partial\\nav",
     "\\src\\utils"
   ],
-  "SelectedNode": "\\src\\app\\pages\\planets\\planets.js",
+  "SelectedNode": "\\src\\app\\pages\\production-report\\production-line.js",
   "PreviewInSolutionExplorer": false
 }
