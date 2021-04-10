@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
-import { toUpper, capitalize } from 'lodash';
+import { toUpper, startCase } from 'lodash';
 import config from 'ROOT/config';
 import './consumption-report.less';
 
@@ -183,7 +183,7 @@ export default () => {
 	return (
 		<div className='consuption-report container mx-auto p-3'>
 			<small className='text-gray-500 dark:text-gray-400 mr-2'>{toUpper(company?.code)}</small>
-			<h1 className='text-xl capitalize inline-block'>{capitalize(company?.name)}</h1>
+			<h1 className='text-xl capitalize inline-block'>{startCase(company?.name)}</h1>
 
 			{reports.length && (
 				<div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { capitalize } from 'lodash'
+import { startCase } from 'lodash'
 
 export default ({ need }) => {
 
@@ -22,7 +22,7 @@ export default ({ need }) => {
 	return (
 		<div className={`p-2 rounded-md ${getBgColors()}`}>
 			<small className='text-gray-500 dark:text-gray-300 mr-2'>{need.material.ticker}</small>
-			<h4 className='text-lg capitalize inline-block'>{capitalize(need.material.name)}</h4>
+			<h4 className='text-lg capitalize inline-block'>{startCase(need.material.name)}</h4>
 			
 			<dl className='lg:flex justify-between'>
 				<div className='m-1'>

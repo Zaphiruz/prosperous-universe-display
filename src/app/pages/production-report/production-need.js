@@ -1,5 +1,5 @@
 import React from 'react';
-import { capitalize } from 'lodash';
+import { startCase } from 'lodash';
 
 const returnConsumption = (orders, inventory) => {
 	console.log(orders, inventory);

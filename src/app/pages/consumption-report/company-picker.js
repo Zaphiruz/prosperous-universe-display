@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
-import { toUpper, capitalize } from 'lodash';
+import { toUpper, startCase } from 'lodash';
 import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
 
@@ -56,7 +56,7 @@ export default () => {
 								className='dark:bg-gray-900 dark:text-white'
 								value={toUpper(company.code)} key={company.code}
 							>
-								{toUpper(company.code)} - {capitalize(company.name)}
+								{toUpper(company.code)} - {startCase(company.name)}
 							</option>
 						))}
 					</select>

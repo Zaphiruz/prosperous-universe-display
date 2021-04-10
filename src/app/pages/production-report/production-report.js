@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
-import { toUpper, capitalize } from 'lodash';
+import { toUpper, startCase } from 'lodash';
 import config from 'ROOT/config';
 import './production-report.less';
 

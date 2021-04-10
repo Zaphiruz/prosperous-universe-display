@@ -1,5 +1,5 @@
 import React from 'react';
-import { capitalize } from 'lodash'
+import { startCase } from 'lodash'
 
 import ProductionOutput from './production-output';
 import ProductionNeed from './production-need';
