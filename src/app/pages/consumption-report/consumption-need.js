@@ -37,7 +37,7 @@ export default ({ need }) => {
 
 				<div className='m-1'>
 					<dt>Consumed per day:</dt>
-					<dd>{need.unitsPerInterval}</dd>
+					<dd>{need.unitsPerInterval.toFixed(2)}</dd>
 				</div>
 				
 
