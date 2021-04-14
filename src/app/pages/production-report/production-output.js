@@ -1,42 +1,38 @@
 import React from 'react';
-import { startCase } from 'lodash';
+import { startCase, uniqWith} from 'lodash';
 
-const returnOrders = (orders) => {
-	let final = orders.map((order) => {
-		if (order.completed > 0) {
-			return "";
-		};
-		return order.outputs.map((output) => {
-			return output.material.ticker;
+const returnItem = (orders) => {
+	let output = {}
+
+	orders.map((order) => {
+		order.map((item) => {
+			//console.log(item.amount);
+			if (item.ticker in output)
+				output[item.ticker] += parseFloat(item.amount);
+			else {
+				output[item.ticker] = parseFloat(item.amount);
+            }
 		});
-	})
-		.filter(Boolean)
-		.join(',');
+	});
+
+	if (Object.keys(output).length < 1) {
+		return "None";
+    }
+
+	let final = []
+    for (let [key, value] of Object.entries(output)) {
+		final.push(`${key}: ${value}`);
+    }	
+	final = final.join(" | ");
 
 	return final;
 };
 
-const returnConsumption = (orders) => {
-	let final = orders.map((order) => {
-		if (order.completed > 0) {
-			return "";
-		};
-		return order.inputs.map((input) => {
-			return input.material.ticker;
-		});
-	})
-		.filter(Boolean)
-		.join(',');
-
-return final;
-};
-
-export default ({ orders }) => {
-
+export default ({ line }) => {
 	return (
 		<div className={`p-2 rounded-md bg-gray-400 dark:bg-gray-800`}>
-			<h3 className='text-lg capitalize inline-block'>Making {returnOrders(orders)}</h3> {"\n"}
-			<h3 className='text-lg capitalize inline-block'>Burning {returnConsumption(orders)}</h3>
+			<h3 className='text-lg capitalize inline-block'>Making {returnItem(line.outputs)}</h3> {"\n"}
+			<h3 className='text-lg capitalize inline-block'>Burning {returnItem(line.inputs)}</h3>
 		</div>
 	)
 };

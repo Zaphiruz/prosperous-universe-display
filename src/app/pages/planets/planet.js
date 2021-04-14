@@ -1,7 +1,7 @@
 import React from 'react';
 import PlanetMat from './planetMat';
 
-export default ({ planet }) => {
+export default ({ planet, target }) => {
 	return (
 		<div className='bg-gray-400 dark:bg-gray-800 p-2 rounded-md my-2'>
 			<span>

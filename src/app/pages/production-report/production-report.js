@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { query } from 'UTILS/graphql-query-helper';
-import { toUpper, startCase } from 'lodash';
+import { toUpper, startCase, uniqBy, isEmpty} from 'lodash';
 import config from 'ROOT/config';
 import './production-report.less';
 
@@ -217,6 +217,19 @@ export default () => {
 		return production;
 	};
 
+	const getAddressStringFor = (addresses) => {
+		if (isEmpty(addresses)) {
+			return '';
+		}
+
+		let planet = addresses.find(entity => entity.type === 'PLANET');
+		let system = addresses.find(entity => entity.type === 'SYSTEM');
+
+		return planet?.entity.name
+			? startCase(planet?.entity.name) + " - " + startCase(system?.entity.name || system?.entity.naturalId)
+			: startCase(planet?.entity.naturalId || system?.entity.naturalId)
+	}
+
 	const correlate = ([inventories, productionLines, sites]) => {
 		let pairs = sites.map((site) => {
 			let siteId = site.siteId;
@@ -230,21 +243,123 @@ export default () => {
 			};
 		});
 
-		console.log("pairs",pairs);
-
 		return pairs;
 	};
 
 	const reportForLocation = ({ site, siteId, productionLine, inventory }) => {
 
-		
+		let daily = productionLine.map((line) => {
+			let timesPerDay = (24 / ((parseInt(line.orders[0].duration.millis) / (1000 * 60 * 60 * 24)) * 24));
+			let siteId = line.siteId;
+			let count = line.capacity;
+			let id = line.id;
+			let type = line.type;
+			let workforce = line.workforce;
+			let efficiency = parseFloat(line.effectivity);
+			let siteName = getAddressStringFor(site.address);
+			let outputs = line.orders.map((order) => {
+				if (order.completed > 0 || order.recurring != true) {
+					return "";
+				};
+				return order.outputs.map((output) => {
+					let ticker = output.material.ticker;
+					let amount = (output.amount * timesPerDay).toFixed(1);
+					return {
+						ticker,
+						amount,
+					};
+				});
+			}).filter(Boolean);
 
-		return {
-			siteId,
-			productionLine,
-			site,
-			inventory,
-		};
+			if (outputs.length > count) {
+				console.log("ERROR!!!");
+			}
+
+			let inputs = line.orders.map((order) => {
+				if (order.completed > 0 || order.recurring != true) {
+					return "";
+				};
+				timesPerDay = (24 / ((order.duration.millis / (1000 * 60 * 60 * 24)) * 24)).toFixed(3);
+				return order.inputs.map((input) => {
+					let ticker = input.material.ticker;
+					let amount = (input.amount * timesPerDay).toFixed(1);
+					return {
+						ticker,
+						amount,
+					};
+				});
+			}).filter(Boolean);
+
+			return {
+				siteId,
+				siteName,
+				id,
+				type,
+				workforce,
+				efficiency,
+				timesPerDay,
+				count,
+				outputs,
+				inputs,
+			}
+		});
+
+		let itemsToBurn = {};
+		daily.map((line) => {
+
+			line.inputs.map((input) => {
+				input.map((item) => {
+					if (item.ticker in itemsToBurn)
+						itemsToBurn[item.ticker] -= parseFloat(item.amount);
+					else {
+						itemsToBurn[item.ticker] = -parseFloat(item.amount);
+					}
+				});
+			});
+			line.outputs.map((output) => {
+				output.map((item) => {
+					if (item.ticker in itemsToBurn)
+						itemsToBurn[item.ticker] += parseFloat(item.amount);
+					else {
+						itemsToBurn[item.ticker] = parseFloat(item.amount);
+					}
+				});
+			});
+		});
+
+		let inventoryOutput = [];
+		for (const [key, value] of Object.entries(itemsToBurn)) {
+			let amountInInv = inventory?.items.find(item => item.quantity.material.ticker === key)?.quantity.amount || 0;
+			if (value > 0) {
+				inventoryOutput.push({ material: key, daysRemaining: "Growing at " + value.toFixed(1) + " per day", currentAmount: amountInInv});
+			}
+			else if (amountInInv === 0) {
+				inventoryOutput.push({ material: key, daysRemaining: "0", currentAmount: amountInInv});
+            }
+			else if (value < 0) {
+				let daysLeft = amountInInv / Math.abs(value);
+				inventoryOutput.push({ material: key, daysRemaining: daysLeft.toFixed(1) + " days left", currentAmount: amountInInv });
+			}
+			else {
+				inventoryOutput.push({ material: key, daysRemaining: "No change", currentAmount: amountInInv });
+            }
+		}
+
+		let siteIds = _.uniqBy(daily, 'siteId').map((line) => { return line.siteId});
+
+		let sites = siteIds.map((site) => {
+			let lines = daily.filter((line) => {
+				return line.siteId === site;
+			});
+			let inventories = {};
+			return {
+				lines,
+				inventories,
+				inventoryOutput,
+			}
+		});
+
+		return sites;
 	};
 
 	useEffect(async () => {
@@ -256,7 +371,7 @@ export default () => {
 		]);
 		let reports = correlate(datas)
 			.map(reportForLocation)
-		setReports(reports);
+		setReports(reports[0]);
 	}, []);
 
 	return (
@@ -271,7 +386,7 @@ export default () => {
 
 			<div>
 				{reports.map(site => (
-					<ProductionSite site={site} key={site.siteId } />
+					<ProductionSite site={site} key={site.lines[0].siteId } />
 				))}
 			</div>
 		</div>

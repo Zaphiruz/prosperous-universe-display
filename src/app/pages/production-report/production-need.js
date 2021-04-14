@@ -31,7 +31,7 @@ const returnConsumption = (orders, inventory) => {
 export default ({ line }) => {
 	return (
 		<div className={`p-2 rounded-md bg-gray-400 dark:bg-gray-800`}>
-			<h3 className='text-lg capitalize inline-block'>{returnConsumption(line.orders, line.inventory)} </h3>
+			
 		</div>
 	)
 };
