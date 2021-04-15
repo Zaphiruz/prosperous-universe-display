@@ -41,7 +41,7 @@ export default () => {
 			previousItem.weight = previousItem.material.weight * count;
 			previousItem.volume = previousItem.material.volume * count;
 		} else {
-			let material = await query(config.api, 'materialOne', { ticker: toUpper(addMaterial) }, { weight: true, volume: true });
+			let material = await query(config.api, 'materialOne', { filter: { ticker: toUpper(addMaterial) } }, { weight: true, volume: true });
 			if(!material) {
 				return setError('No material Found')
 			}

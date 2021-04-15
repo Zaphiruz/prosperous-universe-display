@@ -7,10 +7,10 @@
     "\\src\\app\\pages\\consumption-report",
     "\\src\\app\\pages\\planets",
     "\\src\\app\\pages\\production-report",
-    "\\src\\app\\partial",
+    "\\src\\app\\pages\\shipping-calc",
     "\\src\\app\\partial\\nav",
     "\\src\\utils"
   ],
-  "SelectedNode": "\\src\\app\\pages\\production-report\\production-inventoryItem.js",
+  "SelectedNode": "\\src\\app\\pages\\shipping-calc\\shipping-calc.js",
   "PreviewInSolutionExplorer": false
 }

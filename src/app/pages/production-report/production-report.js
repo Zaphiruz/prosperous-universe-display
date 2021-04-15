@@ -187,7 +187,7 @@ export default () => {
 	let [reports, setReports] = useState([]);
 
 	const fetchCompany = async () => {
-		let company = await query(config.api, 'companyOne', { code: toUpper(companyId) }, CompanyQuery);
+		let company = await query(config.api, 'companyOne', { filter: { code: toUpper(companyId) } }, CompanyQuery);
 		console.log('company', company);
 		setCompany(company);
 		return company;
@@ -195,7 +195,7 @@ export default () => {
 
 	const fetchSites = async (company) => {
 		let ownerId = company.id;
-		let sites = await query(config.api, 'siteMany', { owner: ownerId }, SiteQuery);
+		let sites = await query(config.api, 'siteMany', { filter: { owner: ownerId } }, SiteQuery);
 		console.log("sites", sites);
 		setSites(sites);
 		return sites;
@@ -203,7 +203,7 @@ export default () => {
 
 	const fetchInventories = async (company) => {
 		let ownerId = company.id;
-		let inventories = await query(config.api, 'storageSiteMany', { owner: ownerId, type: "STORE" }, InventoryQuerys);
+		let inventories = await query(config.api, 'storageSiteMany', { filter: { owner: ownerId, type: "STORE" } }, InventoryQuerys);
 		console.log('inventories', inventories);
 		setInventories(inventories);
 		return inventories;
@@ -211,7 +211,7 @@ export default () => {
 
 	const fetchProduction = async (company) => {
 		let ownerId = company.id;
-		let production = await query(config.api, 'productionLineMany', { owner: ownerId }, ProductionQuery);
+		let production = await query(config.api, 'productionLineMany', { filter: { owner: ownerId } }, ProductionQuery);
 		console.log('production', production);
 		setProduction(production);
 		return production;
@@ -331,21 +331,21 @@ export default () => {
 		for (const [key, value] of Object.entries(itemsToBurn)) {
 			let amountInInv = inventory?.items.find(item => item.quantity.material.ticker === key)?.quantity.amount || 0;
 			if (value > 0) {
-				inventoryOutput.push({ material: key, daysRemaining: "Growing at " + value.toFixed(1) + " per day", currentAmount: amountInInv});
+				inventoryOutput.push({ material: key, daysRemaining: "Growing at " + value.toFixed(1) + " per day", currentAmount: amountInInv });
 			}
 			else if (amountInInv === 0) {
-				inventoryOutput.push({ material: key, daysRemaining: "0", currentAmount: amountInInv});
-            }
+				inventoryOutput.push({ material: key, daysRemaining: "0", currentAmount: amountInInv });
+			}
 			else if (value < 0) {
 				let daysLeft = amountInInv / Math.abs(value);
 				inventoryOutput.push({ material: key, daysRemaining: daysLeft.toFixed(1) + " days left", currentAmount: amountInInv });
 			}
 			else {
 				inventoryOutput.push({ material: key, daysRemaining: "No change", currentAmount: amountInInv });
-            }
+			}
 		}
 
-		let siteIds = _.uniqBy(daily, 'siteId').map((line) => { return line.siteId});
+		let siteIds = _.uniqBy(daily, 'siteId').map((line) => { return line.siteId });
 
 		let sites = siteIds.map((site) => {
 			let lines = daily.filter((line) => {
@@ -386,10 +386,9 @@ export default () => {
 
 			<div>
 				{reports.map(site => (
-					<ProductionSite site={site} key={site.lines[0].siteId } />
+					<ProductionSite site={site} key={site.lines[0].siteId} />
 				))}
 			</div>
 		</div>
 	);
-
-}
+};

@@ -29,10 +29,15 @@ const returnItem = (orders) => {
 };
 
 export default ({ line }) => {
+
+	const renderBurning = (returnItem(line.inputs) !== "None")
+		? <h3 className='text-lg capitalize inline-block'>Burning {returnItem(line.inputs)}</h3>
+		: null;
+
 	return (
 		<div className={`p-2 rounded-md bg-gray-400 dark:bg-gray-800`}>
 			<h3 className='text-lg capitalize inline-block'>Making {returnItem(line.outputs)}</h3> {"\n"}
-			<h3 className='text-lg capitalize inline-block'>Burning {returnItem(line.inputs)}</h3>
+			{renderBurning}
 		</div>
 	)
 };

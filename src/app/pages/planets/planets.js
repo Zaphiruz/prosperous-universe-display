@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { query } from 'UTILS/graphql-query-helper';
+import { query, paginate } from 'UTILS/graphql-query-helper';
 import { toUpper, startCase, uniq, flatMap, localeCompare } from 'lodash';
 import config from 'ROOT/config';
 import './planets.less';
@@ -92,6 +92,7 @@ export default () => {
 	let [planetResults, setPlanetResults] = useState([]);
 	let [filterPlanetTier, setFilterPlanetTier] = useState('');
 	let [filterFertility, setFertility] = useState(-1);
+	let [distanceTarget, setDistanceTarget] = useState('Moria');
 	let materialFilterRef = useRef('');
 	let tierFilterRef = useRef('');
 	let fertilityFilterRef = useRef('');
@@ -100,9 +101,10 @@ export default () => {
 
 	const fetchPlanets = async () => {
 		console.log("About to query");
-		let planets = await query(config.api, 'planetMany', {}, PlanetQuery);	//planetMany
-		console.log(planets)
-		planets = planets.filter((planet) => !!planet.data.resources.length);
+
+		let planets = await paginate(config.api, 'planetPagination', { filter: {materials: [""]} }, PlanetQuery);
+		console.log("planets", planets);
+		planets = planets.items.filter((planet) => !!planet.data.resources.length);
 		setPlanets(planets);
 		return planets;
 	}
@@ -121,18 +123,25 @@ export default () => {
 		let newMaterialFilter = toUpper(materialFilterRef.current.value);
 		let newFertilityFilter = fertilityFilterRef.current.value;
 		let newTierFilter = parseInt(tierFilterRef.current.value);
+		let maxDistanceFilter = parseInt(distanceFilterRef.current.value);
 
 		let ferilityQuery = (newFertilityFilter === "") ? undefined : { fertility: { lte: parseFloat(newFertilityFilter) } };
+		let tierQuery = (tierFilterRef.current.value === "Any") ? undefined : { planetTier: parseInt(tierFilterRef.current.value) };
+		let toMoria = (targetFilterRef !== "Moria") ? undefined : maxDistanceFilter;
+		let toHortus = (targetFilterRef !== "Hortus") ? undefined : maxDistanceFilter;
+		let toBenten = (targetFilterRef !== "Benten") ? undefined : maxDistanceFilter;
+		let toAntares = (targetFilterRef !== "Antares") ? undefined : maxDistanceFilter;
 
-		console.log(newMaterialFilter, newTierFilter, newFertilityFilter);
+		console.log(newMaterialFilter, tierQuery, newFertilityFilter, tierFilterRef.current.value);
 
-		let mat = await query(config.api, 'materialOne', { ticker: newMaterialFilter }, MaterialQuery);
-		console.log(mat);
-		let filteredPlanets = await query(config.api, 'planetMany', { materials: [mat.id], tier: { planetTier: newTierFilter }, data: ferilityQuery }, PlanetQuery);
-
+		let mat = await query(config.api, 'materialOne', { filter: { ticker: newMaterialFilter } }, MaterialQuery);
+		console.log("queryMaterial", mat);
+		let filteredPlanets = await paginate(config.api, 'planetPagination', { perPage: 100, filter: { materials: [mat.id], tier: tierQuery, data: ferilityQuery, toMoria, toHortus, toBenten, toAntares } }, PlanetQuery);
+		console.log("unfiltered", filteredPlanets);
+		filteredPlanets = filteredPlanets.items.filter((planet) => !!planet.data.resources.length);
 		// TODO: Sort, Less than/Greater than, Pagination
 
-		console.log(filteredPlanets);
+		console.log("filtered", filteredPlanets);
 
 		setPlanetResults(filteredPlanets);
 	};
@@ -151,7 +160,7 @@ export default () => {
 							id='materialFilter'
 							name='materialFilter'
 							ref={materialFilterRef}
-							className="mr-2 text-black"
+							className="mr-2 text-white"
 							pattern='[a-zA-Z0-9]{1,3}'
 							required="required"
 							placeholder='i.e. RAT'
@@ -159,11 +168,12 @@ export default () => {
 						/>
 
 						<strong> Planet Tier: </strong>
-						<select className="text-black" id='tierFilter' ref={ tierFilterRef }>
-							<option key="3" value="3">3</option>
-							<option key="2" value="2">2</option>
-							<option key="1" value="1">1</option>
-							<option key="0" value="0">0</option>
+						<select className="text-white" id='tierFilter' ref={tierFilterRef}>
+							<option key="Any" value="Any" className="text-black">Any</option>
+							<option key="3" value="3" className="text-black">3</option>
+							<option key="2" value="2" className="text-black">2</option>
+							<option key="1" value="1" className="text-black">1</option>
+							<option key="0" value="0" className="text-black">0</option>
 						</select>
 
 						<strong> Fertility </strong>
@@ -171,7 +181,7 @@ export default () => {
 							id='fertilityFilter'
 							step="any"
 							name='fertilityFilter'
-							className='mr-2 text-black'
+							className='mr-2 text-white'
 							placeholder='0-1, leave blank if all'
 							ref={fertilityFilterRef}
 							title="Fertility should be a number between 0 and 1. -1 is for all."
@@ -182,18 +192,18 @@ export default () => {
 							id='fertilityFilter'
 							step="1"
 							name='distanceFilter'
-							className='mr-2 text-black'
+							className='mr-2 text-white'
 							placeholder='Whole number: 1, 2, 3'
 							ref={distanceFilterRef}
 							title="Distance needs to be a whole number."
 						/>
 
 						<strong> Target </strong>
-						<select className="text-black" id='targetFilter' ref={targetFilterRef}>
-							<option key="Moria" value="Moria">Moria</option>
-							<option key="Hortus" value="Hortus">Hortus</option>
-							<option key="Benten" value="Benten">Benten</option>
-							<option key="Antares" value="Antares">Antares</option>
+						<select className="text-white" id='targetFilter' ref={targetFilterRef}>
+							<option key="Moria" value="Moria" className="text-black">Moria</option>
+							<option key="Hortus" value="Hortus" className="text-black">Hortus</option>
+							<option key="Benten" value="Benten" className="text-black">Benten</option>
+							<option key="Antares" value="Antares" className="text-black">Antares</option>
 						</select>
 
 					</label>
@@ -207,7 +217,7 @@ export default () => {
 
 			<div className=''>
 				{planetResults.map(planet => (
-					<PlanetVisual planet={planet} key={ planet.naturalId }/>	
+					<PlanetVisual planet={planet} target={targetFilterRef.current.value} key={ planet.naturalId }/>	
 				))}
 			</div>
 		</div>

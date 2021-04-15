@@ -3,17 +3,12 @@ import { startCase } from 'lodash';
 
 import ProductionInventoryItem from './production-inventoryItem';
 
-const testing = (item) => {
-	console.log("Test 1", item);
-	return item;
-}
-
 export default ({ inventoryOutput }) => {
 	return (
-		<div className={`p-2 rounded-md bg-gray-400 dark:bg-gray-800`}>
+		<div className={`grid grid-flow-row grid-cols-2 gap-2 mt-1 `}>
 			{inventoryOutput.map((item) => (
-				<ProductionInventoryItem inventoryItem={testing(item)} key={"productionInventoryItem" + item.material} />
+				<ProductionInventoryItem inventoryItem={item} key={"productionInventoryItem" + item.material} />
 			))}
 		</div>
-	)
+	);
 };

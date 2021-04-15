@@ -1,50 +1,67 @@
 import { request } from 'graphql-request';
+import { isEmpty } from 'lodash';
 
-export function query(url, method, filter, body) {
-	let filterString = _makeFilterString(filter);
+export function query(url, method, headers, body) {
+	let headerString = _makeHeaderString(headers);
 	let bodyString = _makeBodyString(body);
-	let queryString = `query { ${method}${filterString} { \n${bodyString}\n } }`
+	let queryString = `query { ${method}${headerString} { \n${bodyString}\n } }`
 
 	console.log('fetch ', url);
+	console.log("headerString", headerString);
+	console.log("bodyString", bodyString);
 	return request(url, queryString).then(data => data[method]);
 }
 
-//export function queryLarge(url, method, filter, body) {
-
-//}
-
-function _makeFilterString(filter) {
-	let filterArray = [];
-	if (filter) {
-		const thingToString = ([key, value]) => {
-			switch (true) {
-				case Array.isArray(value):
-					return `${key}: [${value.map(v => `"${v}"`).join(',')}],`;
-
-				case typeof (value) === 'object':
-					return `${key}: { ${Object.entries(value).map(thingToString).join('')} },`
-
-				case typeof (value) === 'number':
-					return `${key}: ${value},`
-
-				case typeof (value) === 'undefined':
-					return;
-
-				default:
-					return `${key}: "${value}",`
-			}
+export function paginate(url, method, headers, body) {
+	const paginationBody = {
+		count: true,
+		items: body,
+		pageInfo: {
+			currentPage: true,
+			perPage: true,
+			pageCount: true,
+			itemCount: true,
+			hasNextPage: true,
+			hasPreviousPage: true,
 		}
+    }
 
-		let queries = Object.entries(filter).map(thingToString);
+	return query(url, method, headers, paginationBody);
+}
 
-		filterArray = [
-			'(filter: {',
-			...queries,
-			'})'
-		]
+/**
+ * {
+ * 	filter: { name: "7" },
+ * 	sort: "_CODE_ASC",
+ * }
+ */
+function _makeHeaderString(header) {
+	let headerArray = [];
+	if (header) {
+		let queries = Object
+			.entries(header)
+			.map(([key, value]) => {
+				switch (true) {
+					case Array.isArray(value):
+						return `${key}: [${value.map(v => `"${v}"`).join(',')}],`;
+
+					case typeof (value) === 'object':
+						return `${key}: { ${Object.entries(value).map(thingToString).join('')} },`
+
+					case typeof (value) === 'number':
+						return `${key}: ${value},`
+
+					case typeof (value) === 'undefined':
+						return;
+
+					default:
+						return `${key}: "${value}",`
+				}
+			});
+
+		headerArray = ['(', ...queries, ')']
 	}
-
-	return filterArray.join('');
+	//console.log('headerArray', headerArray);
 }
 
 function _makeBodyString(body) {

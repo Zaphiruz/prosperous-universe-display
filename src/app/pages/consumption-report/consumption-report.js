@@ -81,7 +81,7 @@ export default () => {
 	let [ reports, setReports ] = useState([]);
 
 	const fetchCompany = async () => {
-		let company = await query(config.api, 'companyOne', { code: toUpper(companyId) }, CompanyQuery);
+		let company = await query(config.api, 'companyOne', { filter: { code: toUpper(companyId) }}, CompanyQuery);
 		console.log('company', company)
 		setCompany(company);
 		return company;
@@ -89,7 +89,7 @@ export default () => {
 
 	const fetchWorkforces = async (company) => {
 		let ownerId = company.id;
-		let workforces = await query(config.api, 'workforceMany', { owner: ownerId }, WorkForceQuery);
+		let workforces = await query(config.api, 'workforceMany', { filter: { owner: ownerId } }, WorkForceQuery);
 		console.log('workforces', workforces)
 		setWorkforces(workforces);
 		return workforces;
@@ -97,7 +97,7 @@ export default () => {
 
 	const fetchInventories = async (company) => {
 		let ownerId = company.id;
-		let inventories = await query(config.api, 'storageSiteMany', { owner: ownerId, type: "STORE" }, InventoryQuerys);
+		let inventories = await query(config.api, 'storageSiteMany', { filter: { owner: ownerId, type: "STORE" }}, InventoryQuerys);
 		console.log('inventories', inventories)
 		setInventories(inventories);
 		return inventories;
