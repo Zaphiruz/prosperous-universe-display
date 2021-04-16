@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { toUpper, startCase } from 'lodash';
 import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
@@ -11,6 +12,10 @@ const CompanyQuery = {
 	name: true,
 	code: true,
 };
+
+const getURL = () => {
+	return window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
+}
 
 export default () => {
 	const [companies, setCompanies] = useState([]);
@@ -34,7 +39,7 @@ export default () => {
 	}, [])
 
 	if (redirectToCompany) {
-		return <Redirect push to={`/consumption-report/${redirectToCompany}`}/>
+		return <Redirect push to={`/${getURL()}/${redirectToCompany}`}/>
 	}
 
 	return (

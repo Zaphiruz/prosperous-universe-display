@@ -8,7 +8,7 @@ export function query(url, method, headers, body) {
 
 	console.log('fetch ', url);
 	console.log("headerString", headerString);
-	console.log("bodyString", bodyString);
+	//console.log("bodyString", bodyString);
 	return request(url, queryString).then(data => data[method]);
 }
 
@@ -46,12 +46,14 @@ function _makeHeaderString(header) {
 						return `${key}: [${value.map(v => `"${v}"`).join(',')}],`;
 
 					case typeof (value) === 'object':
+						console.log("object breakdown");
 						return `${key}: { ${Object.entries(value).map(thingToString).join('')} },`
 
 					case typeof (value) === 'number':
 						return `${key}: ${value},`
 
 					case typeof (value) === 'undefined':
+						console.log("yup");
 						return;
 
 					default:
@@ -62,6 +64,27 @@ function _makeHeaderString(header) {
 		headerArray = ['(', ...queries, ')']
 	}
 	//console.log('headerArray', headerArray);
+	return headerArray;
+}
+
+// DROPPED THIS IN AS THE (VALUE) === 'OBJECT' PIECE IN _MAKEHEADERSTRING BROKE
+const thingToString = ([key, value]) => {
+	switch (true) {
+		case Array.isArray(value):
+			return `${key}: [${value.map(v => `"${v}"`).join(',')}],`;
+
+		case typeof (value) === 'object':
+			return `${key}: { ${Object.entries(value).map(thingToString).join('')} },`
+
+		case typeof (value) === 'number':
+			return `${key}: ${value},`
+
+		case typeof (value) === 'undefined':
+			return;
+
+		default:
+			return `${key}: "${value}",`
+	}
 }
 
 function _makeBodyString(body) {

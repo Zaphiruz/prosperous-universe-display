@@ -6,6 +6,7 @@ import config from 'ROOT/config';
 import './planets.less';
 
 import PlanetVisual from './planet';
+import Loading from 'COMPONENTS/loading';
 
 const PlanetQuery = {
 	_id: true,
@@ -86,72 +87,113 @@ const MaterialQuery = {
 export default () => {
 	console.log("Loading page...");
 
-	let [planets, setPlanets] = useState([]);
-	let [company, setCompany] = useState({});
-	let [filterMaterial, setFilterMaterial] = useState('');
+	//let [planets, setPlanets] = useState([]);
+	//let [company, setCompany] = useState({});
+	//let [filterMaterial, setFilterMaterial] = useState('');
 	let [planetResults, setPlanetResults] = useState([]);
-	let [filterPlanetTier, setFilterPlanetTier] = useState('');
-	let [filterFertility, setFertility] = useState(-1);
+	//let [filterPlanetTier, setFilterPlanetTier] = useState('');
+	//let [filterFertility, setFertility] = useState(-1);
 	let [distanceTarget, setDistanceTarget] = useState('Moria');
+	let [paginationPage, setPaginationPage] = useState(1);
+	let [paginationMax, setPaginationMax] = useState(-1);
 	let materialFilterRef = useRef('');
 	let tierFilterRef = useRef('');
-	let fertilityFilterRef = useRef('');
-	let distanceFilterRef = useRef('');
+	//let fertilityFilterRef = useRef('');
+	//let distanceFilterRef = useRef('');
 	let targetFilterRef = useRef('');
 
-	const fetchPlanets = async () => {
-		console.log("About to query");
+	//const fetchPlanets = async () => {
+	//	console.log("About to query");
 
-		let planets = await paginate(config.api, 'planetPagination', { filter: {materials: [""]} }, PlanetQuery);
-		console.log("planets", planets);
-		planets = planets.items.filter((planet) => !!planet.data.resources.length);
-		setPlanets(planets);
-		return planets;
-	}
+	//	let planets = await paginate(config.api, 'planetPagination', { perPage: 100, filter: {} }, PlanetQuery);
+	//	console.log("planets", planets);
+	//	planets = planets.items.filter((planet) => !!planet.data.resources.length);
+	//	setPlanets(planets);
+	//	return planets;
+	//}
 
 	useEffect(async () => {
-		let planets = await fetchPlanets();
-		setPlanetResults(planets);
+		//let planets = await fetchPlanets();
+		//setPlanetResults(planets);
+		paginateQuery(1, 50);
 	}, []);
 
-	const resourcesUnique = _.uniq(_.flatMap(planets.map((planet) => planet.data.resources.map((resource) => resource.material.ticker)))).sort(function (a, b) { return a.localeCompare(b) });
+	//const resourcesUnique = _.uniq(_.flatMap(planets.map((planet) => planet.data.resources.map((resource) => resource.material.ticker)))).sort(function (a, b) { return a.localeCompare(b) });
+
+	const paginateQuery = async (page, perPage) => {
+		setPlanetResults([]);
+		setPaginationMax(-1);
+		let newMaterialFilter = toUpper(materialFilterRef.current.value);
+		let tierQuery = (tierFilterRef.current.value === "Any") ? undefined : { planetTier: parseInt(tierFilterRef.current.value) };
+		let mat = await query(config.api, 'materialOne', { filter: { ticker: newMaterialFilter } }, MaterialQuery);
+		let filter = {};
+		if (mat?.id) {
+			filter.materials = [mat.id];
+		}
+		if (tierQuery) {
+			filter.tier = tierQuery;
+		}
+		let filteredPlanets = await paginate(config.api, 'planetPagination', { perPage: perPage, page: page, filter: filter }, PlanetQuery);
+		setPaginationPage(filteredPlanets.pageInfo.currentPage);
+		setPaginationMax(filteredPlanets.pageInfo.pageCount);
+		filteredPlanets = filteredPlanets.items.filter((planet) => !!planet.data.resources.length);
+		setPlanetResults(filteredPlanets);
+    }
 
 	const onSubmitClick = async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		let newMaterialFilter = toUpper(materialFilterRef.current.value);
-		let newFertilityFilter = fertilityFilterRef.current.value;
-		let newTierFilter = parseInt(tierFilterRef.current.value);
-		let maxDistanceFilter = parseInt(distanceFilterRef.current.value);
-
-		let ferilityQuery = (newFertilityFilter === "") ? undefined : { fertility: { lte: parseFloat(newFertilityFilter) } };
-		let tierQuery = (tierFilterRef.current.value === "Any") ? undefined : { planetTier: parseInt(tierFilterRef.current.value) };
-		let toMoria = (targetFilterRef !== "Moria") ? undefined : maxDistanceFilter;
-		let toHortus = (targetFilterRef !== "Hortus") ? undefined : maxDistanceFilter;
-		let toBenten = (targetFilterRef !== "Benten") ? undefined : maxDistanceFilter;
-		let toAntares = (targetFilterRef !== "Antares") ? undefined : maxDistanceFilter;
-
-		console.log(newMaterialFilter, tierQuery, newFertilityFilter, tierFilterRef.current.value);
-
-		let mat = await query(config.api, 'materialOne', { filter: { ticker: newMaterialFilter } }, MaterialQuery);
-		console.log("queryMaterial", mat);
-		let filteredPlanets = await paginate(config.api, 'planetPagination', { perPage: 100, filter: { materials: [mat.id], tier: tierQuery, data: ferilityQuery, toMoria, toHortus, toBenten, toAntares } }, PlanetQuery);
-		console.log("unfiltered", filteredPlanets);
-		filteredPlanets = filteredPlanets.items.filter((planet) => !!planet.data.resources.length);
-		// TODO: Sort, Less than/Greater than, Pagination
-
-		console.log("filtered", filteredPlanets);
-
-		setPlanetResults(filteredPlanets);
+		setPaginationPage(1);
+		paginateQuery(1, 20);
 	};
+
+	const switchPage = async (e) => {
+		let pageCount = 50;
+		if ((e === -1 && paginationPage === 1) || paginationMax === -1) {
+			return;
+		}
+		else if (e === -10) {
+			setPaginationPage(1);
+			paginateQuery(1, pageCount);
+		}
+		else if (e === 10) {
+			setPaginationPage(paginationMax);
+			paginateQuery(paginationMax, pageCount);
+        }
+		else {
+			setPaginationPage(paginationPage + e);
+			paginateQuery(paginationPage + e, pageCount);
+        }
+    }
 
 	// Show what would take to build on the planet
 
+
+	//<strong> Max Distance </strong>
+	//<input type='number'
+	//	id='fertilityFilter'
+	//	step="1"
+	//	name='distanceFilter'
+	//	className='mr-2 text-white'
+	//	placeholder='Whole number: 1, 2, 3'
+	//	ref={distanceFilterRef}
+	//	title="Distance needs to be a whole number."
+	///>
+
+	//<strong> Fertility </strong>
+	//<input type='number'
+	//	id='fertilityFilter'
+	//	step="any"
+	//	name='fertilityFilter'
+	//	className='mr-2 text-white'
+	//	placeholder='0-1, leave blank if all'
+	//	ref={fertilityFilterRef}
+	//	title="Fertility should be a number between 0 and 1. -1 is for all."
+	///>
+
 	return (
 		<div className='consuption-report container mx-auto p-3'>
-			<h1 className='text-xl capitalize inline-block'>Planets --- page loading...</h1>
-
 			<div>
 				<form onSubmit={onSubmitClick}>
 					<label>
@@ -176,28 +218,6 @@ export default () => {
 							<option key="0" value="0" className="text-black">0</option>
 						</select>
 
-						<strong> Fertility </strong>
-						<input type='number'
-							id='fertilityFilter'
-							step="any"
-							name='fertilityFilter'
-							className='mr-2 text-white'
-							placeholder='0-1, leave blank if all'
-							ref={fertilityFilterRef}
-							title="Fertility should be a number between 0 and 1. -1 is for all."
-						/>
-
-						<strong> Max Distance </strong>
-						<input type='number'
-							id='fertilityFilter'
-							step="1"
-							name='distanceFilter'
-							className='mr-2 text-white'
-							placeholder='Whole number: 1, 2, 3'
-							ref={distanceFilterRef}
-							title="Distance needs to be a whole number."
-						/>
-
 						<strong> Target </strong>
 						<select className="text-white" id='targetFilter' ref={targetFilterRef}>
 							<option key="Moria" value="Moria" className="text-black">Moria</option>
@@ -214,12 +234,26 @@ export default () => {
 				</form>
 
 			</div>
+			{planetResults.length && (
+				<div className=''>
+					{planetResults.map(planet => (
+						<PlanetVisual planet={planet} target={targetFilterRef.current.value} key={planet.naturalId} />
+					))}
+				</div>
+			) || (
+				<Loading />
+			)}
 
-			<div className=''>
-				{planetResults.map(planet => (
-					<PlanetVisual planet={planet} target={targetFilterRef.current.value} key={ planet.naturalId }/>	
-				))}
+			<div className="flex justify-center">
+				<button className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100 mr-2 p-1' onClick={() => switchPage(-10)}>First</button>
+				<button className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100 mr-2 p-1' onClick={() => switchPage(-1)}>Prior</button>
+				<div className='mr-2 p-1'>
+					<h3>Page {paginationPage}</h3>
+				</div>
+				<button className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100 mr-2 p-1' onClick={() => switchPage(1)}>Next</button>
+				<button className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100 mr-2 p-1' onClick={() => switchPage(10)}>Last</button>
 			</div>
+
 		</div>
 	);
 

@@ -5,10 +5,10 @@
     "\\src\\app",
     "\\src\\app\\pages",
     "\\src\\app\\pages\\consumption-report",
+    "\\src\\app\\pages\\materials",
     "\\src\\app\\pages\\planets",
     "\\src\\app\\pages\\production-report",
     "\\src\\app\\pages\\shipping-calc",
-    "\\src\\app\\partial\\nav",
     "\\src\\utils"
   ],
   "SelectedNode": "\\src\\app\\pages\\shipping-calc\\shipping-calc.js",

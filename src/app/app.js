@@ -11,7 +11,7 @@ import Nav from './partial/nav/nav';
 import Home from './pages/home/home';
 import Materials from './pages/materials/materials';
 import ConsumptionReport from './pages/consumption-report/consumption-report';
-import CompanyPicker from './pages/consumption-report/company-picker';
+import CompanyPicker from './pages/company-picker/company-picker';
 import ProductionReport from './pages/production-report/production-report';
 import ShippingCalc from './pages/shipping-calc/shipping-calc';
 import Planets from './pages/planets/planets';
@@ -28,6 +28,7 @@ export default () => (
 				<Route path='/production-report/:companyId' component={ProductionReport} />
 				<Route path='/shipping-calc' component={ShippingCalc} />
 				<Route path='/planets' component={Planets} />
+				<Route path='/production-report' exact component={CompanyPicker} />
 			</Switch>
 		</Router>
 	</div>

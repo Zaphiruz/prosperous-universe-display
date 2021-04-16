@@ -6,6 +6,7 @@ import config from 'ROOT/config';
 import './production-report.less';
 
 import ProductionSite from './production-site';
+import Loading from 'COMPONENTS/loading';
 
 const CompanyQuery = {
 	id: true,
@@ -384,11 +385,15 @@ export default () => {
 				<small>Please note: This is only working on reoccuring orders only at the moment...</small>
 			</div>
 
-			<div>
-				{reports.map(site => (
-					<ProductionSite site={site} key={site.lines[0].siteId} />
-				))}
-			</div>
+			{reports.length && (
+				<div>
+					{reports.map(site => (
+						<ProductionSite site={site} key={site.lines[0].siteId} />
+					))}
+				</div>
+			) || (
+				<Loading />
+			)}
 		</div>
 	);
 };
