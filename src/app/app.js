@@ -24,11 +24,11 @@ export default () => (
 			<Switch>
 				<Route path="/" exact component={Home} />
 				<Route path='/consumption-report' exact component={CompanyPicker} />
+				<Route path='/production-report' exact component={CompanyPicker} />
 				<Route path='/consumption-report/:companyId' component={ConsumptionReport} />
 				<Route path='/production-report/:companyId' component={ProductionReport} />
 				<Route path='/shipping-calc' component={ShippingCalc} />
 				<Route path='/planets' component={Planets} />
-				<Route path='/production-report' exact component={CompanyPicker} />
 			</Switch>
 		</Router>
 	</div>
