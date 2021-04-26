@@ -46,7 +46,7 @@ const PlanetQuery = {
 			}
 		},
 		//sunlight: true,
-		//surface: true,
+		surface: true,
 		temperature: true,
 		takenPlots: true
 	},
@@ -125,7 +125,10 @@ export default () => {
 		setPaginationMax(-1);
 		let newMaterialFilter = toUpper(materialFilterRef.current.value);
 		let tierQuery = (tierFilterRef.current.value === "Any") ? undefined : { planetTier: parseInt(tierFilterRef.current.value) };
-		let mat = await query(config.api, 'materialOne', { filter: { ticker: newMaterialFilter } }, MaterialQuery);
+		let mat = null;
+		if (newMaterialFilter) {
+			mat = await query(config.api, 'materialOne', { filter: { ticker: newMaterialFilter } }, MaterialQuery);
+        }
 		let filter = {};
 		if (mat?.id) {
 			filter.materials = [mat.id];
@@ -138,6 +141,7 @@ export default () => {
 		setPaginationMax(filteredPlanets.pageInfo.pageCount);
 		filteredPlanets = filteredPlanets.items.filter((planet) => !!planet.data.resources.length);
 		setPlanetResults(filteredPlanets);
+		console.log("FilteredPlanets", filteredPlanets);
     }
 
 	const onSubmitClick = async (e) => {
@@ -204,7 +208,6 @@ export default () => {
 							ref={materialFilterRef}
 							className="mr-2 text-white"
 							pattern='[a-zA-Z0-9]{1,3}'
-							required="required"
 							placeholder='i.e. RAT'
 							title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
 						/>

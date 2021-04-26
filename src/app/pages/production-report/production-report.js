@@ -214,6 +214,29 @@ export default () => {
 		let ownerId = company.id;
 		let production = await query(config.api, 'productionLineMany', { filter: { owner: ownerId } }, ProductionQuery);
 		console.log('production', production);
+
+		production = production.map((line) => {
+			let countOfActiveOrders = 0;
+			line.orders.map((order) => {
+				if (order.completed > 0) {
+					countOfActiveOrders += 1;
+				}
+			});
+
+			if (countOfActiveOrders < line.capacity) {
+				let orders = [];
+				for (var i = 0; i < line.orders.length; i++) {
+					if (i > line.capacity - 1) {
+						orders.push(line.orders[i]);
+                    }
+				}
+
+				line.orders = orders;
+            }
+
+			return line;
+		});
+		console.log('post production', production);
 		setProduction(production);
 		return production;
 	};
@@ -250,21 +273,43 @@ export default () => {
 	const reportForLocation = ({ site, siteId, productionLine, inventory }) => {
 
 		let daily = productionLine.map((line) => {
-			let timesPerDay = (24 / ((parseInt(line.orders[0].duration.millis) / (1000 * 60 * 60 * 24)) * 24));
 			let siteId = line.siteId;
-			let count = line.capacity;
+			let siteName = getAddressStringFor(site.address);
 			let id = line.id;
 			let type = line.type;
 			let workforce = line.workforce;
 			let efficiency = parseFloat(line.effectivity);
-			let siteName = getAddressStringFor(site.address);
-			let outputs = line.orders.map((order) => {
+			let count = line.capacity;
+
+			let timesPerDay = null;
+			let utilization = null;
+			let outputs = null;
+			let inputs = null;
+
+			if (line.orders.length < 1) {
+				return {
+					siteId,
+					siteName,
+					id,
+					type,
+					workforce,
+					efficiency,
+					timesPerDay,
+					count,
+					outputs,
+					inputs,
+				}
+            }
+
+			timesPerDay = (24 / ((parseInt(line.orders[0].duration.millis) / (1000 * 60 * 60 * 24)) * 24));
+			utilization = count / line.orders.length;
+			outputs = line.orders.map((order) => {
 				if (order.completed > 0 || order.recurring != true) {
 					return "";
 				};
 				return order.outputs.map((output) => {
 					let ticker = output.material.ticker;
-					let amount = (output.amount * timesPerDay).toFixed(1);
+					let amount = (output.amount * timesPerDay * utilization).toFixed(1);
 					return {
 						ticker,
 						amount,
@@ -276,7 +321,7 @@ export default () => {
 				console.log("ERROR!!!");
 			}
 
-			let inputs = line.orders.map((order) => {
+			inputs = line.orders.map((order) => {
 				if (order.completed > 0 || order.recurring != true) {
 					return "";
 				};
@@ -307,25 +352,26 @@ export default () => {
 
 		let itemsToBurn = {};
 		daily.map((line) => {
-
-			line.inputs.map((input) => {
-				input.map((item) => {
-					if (item.ticker in itemsToBurn)
-						itemsToBurn[item.ticker] -= parseFloat(item.amount);
-					else {
-						itemsToBurn[item.ticker] = -parseFloat(item.amount);
-					}
+			if (line.orders) {
+				line.inputs.map((input) => {
+					input.map((item) => {
+						if (item.ticker in itemsToBurn)
+							itemsToBurn[item.ticker] -= parseFloat(item.amount);
+						else {
+							itemsToBurn[item.ticker] = -parseFloat(item.amount);
+						}
+					});
 				});
-			});
-			line.outputs.map((output) => {
-				output.map((item) => {
-					if (item.ticker in itemsToBurn)
-						itemsToBurn[item.ticker] += parseFloat(item.amount);
-					else {
-						itemsToBurn[item.ticker] = parseFloat(item.amount);
-					}
+				line.outputs.map((output) => {
+					output.map((item) => {
+						if (item.ticker in itemsToBurn)
+							itemsToBurn[item.ticker] += parseFloat(item.amount);
+						else {
+							itemsToBurn[item.ticker] = parseFloat(item.amount);
+						}
+					});
 				});
-			});
+			}
 		});
 
 		let inventoryOutput = [];

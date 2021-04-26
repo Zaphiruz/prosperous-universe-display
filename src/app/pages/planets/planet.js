@@ -37,6 +37,10 @@ export default ({ planet, target }) => {
 					<small className='text-gray-500 dark:text-gray-400 mr-2'> Distance to {target} </small>
 					<h3 className='text-lg capitalize inline-block'>{returnDistance()} </h3>
 				</div>
+				<div className='nowrap mr-1'>
+					<small className='text-gray-500 dark:text-gray-400 mr-2'> Type </small>
+					<h3 className='text-lg capitalize inline-block'>{(planet.data.surface ? "MCG 4/u" : "AEF .33/u")} </h3>
+				</div>
 			</div>
 			<div className="flex grid">
 				<h3 className='text-lg capitalize inline-block'>  Tiers  </h3>
@@ -46,15 +50,15 @@ export default ({ planet, target }) => {
 				</div>
 				<div>
 					<small className='text-gray-500 dark:text-gray-400 mr-2'> Gravity</small>
-					<h3 className='text-lg capitalize inline-block'>{(planet.tier.gravity === -1) ? "Low" : ((planet.tier.gravity === 1) ? "High " : "Normal ")}</h3>
+					<h3 className='text-lg capitalize inline-block'>{(planet.tier.gravity === -1) ? "MGC 1" : ((planet.tier.gravity === 1) ? "BL 1" : "Normal ")}</h3>
 				</div>
 				<div>
 					<small className='text-gray-500 dark:text-gray-400 mr-2'> Pressure</small>
-					<h3 className='text-lg capitalize inline-block'>{(planet.tier.pressure === -1) ? "Low" : ((planet.tier.pressure === 1) ? "High " : "Normal ")}</h3>
+					<h3 className='text-lg capitalize inline-block'>{(planet.tier.pressure === -1) ? "SEA 1/u" : ((planet.tier.pressure === 1) ? "HSE 1 " : "Normal ")}</h3>
 				</div>
 				<div>
 					<small className='text-gray-500 dark:text-gray-400 mr-2'> Temperature</small>
-					<h3 className='text-lg capitalize inline-block'>{(planet.tier.temperature === -1) ? "Low" : ((planet.tier.temperature === 1) ? "High " : "Normal ")}</h3>
+					<h3 className='text-lg capitalize inline-block'>{(planet.tier.temperature === -1) ? "INS 10/u" : ((planet.tier.temperature === 1) ? "TSH 1 " : "Normal ")}</h3>
 				</div>
 			</div>
 			<div className='flex'>

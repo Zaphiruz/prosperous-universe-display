@@ -4,6 +4,10 @@ import { startCase, uniqWith} from 'lodash';
 const returnItem = (orders) => {
 	let output = {}
 
+	if (!orders) {
+		return "No Reoccuring Orders";
+    }
+
 	orders.map((order) => {
 		order.map((item) => {
 			//console.log(item.amount);
@@ -16,7 +20,7 @@ const returnItem = (orders) => {
 	});
 
 	if (Object.keys(output).length < 1) {
-		return "None";
+		return "No Reoccuring Orders";
     }
 
 	let final = []
@@ -30,7 +34,7 @@ const returnItem = (orders) => {
 
 export default ({ line }) => {
 
-	const renderBurning = (returnItem(line.inputs) !== "None")
+	const renderBurning = (returnItem(line.inputs) !== "No Reoccuring Orders")
 		? <h3 className='text-lg capitalize inline-block'>Burning {returnItem(line.inputs)}</h3>
 		: null;
 
