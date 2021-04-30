@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\app",
+    "\\src\\app\\pages",
+    "\\src\\app\\pages\\home",
+    "\\src\\app\\pages\\planets",
+    "\\src\\app\\pages\\production-report",
+    "\\src\\app\\partial",
+    "\\src\\app\\partial\\nav",
+    "\\src\\utils"
+  ],
+  "SelectedNode": "\\src\\app\\pages\\planets\\planet.js",
+  "PreviewInSolutionExplorer": false
+}

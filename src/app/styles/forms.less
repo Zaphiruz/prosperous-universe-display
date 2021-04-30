@@ -1,0 +1,57 @@
+label {
+	position: relative;
+	@apply mb-1;
+
+	&::after {
+		margin-right: .25em;
+		padding-right: .05em;
+
+		content: ":";
+		position: absolute;
+		left: 100%;
+		top: 50%;
+		transform: translate3d(0, -50%, 0);
+		width: .25em;
+	}
+}
+label + input,
+label + select {
+	@apply ml-2;
+}
+
+input {
+	@apply bg-transparent border-b-2 border-blue-700 border-opacity-30;
+}
+input:focus,
+input:active {
+	@apply border-opacity-100;
+}
+
+select {
+	@apply bg-transparent border-b-2 border-blue-700 border-opacity-30;
+
+	option:checked {
+		background: inherit;
+		color: inherit;
+	}
+}
+
+fieldset {
+	@apply mt-2 border border-blue-700 border-opacity-20;
+	position: relative;
+	padding: 0.5em;
+	
+	legend {
+		@apply bg-blue-700 font-bold;
+		position: absolute;
+		bottom: 100%;
+		left: -1px;
+		padding-right: 0.5em;
+		padding-left: 0.5em;
+	}
+
+	input,
+	label {
+		@apply ml-2;
+	}
+}
