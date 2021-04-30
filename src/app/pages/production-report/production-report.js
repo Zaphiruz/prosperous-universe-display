@@ -213,7 +213,7 @@ export default () => {
 	const fetchProduction = async (company) => {
 		let ownerId = company.id;
 		let production = await query(config.api, 'productionLineMany', { filter: { owner: ownerId } }, ProductionQuery);
-		//console.log('production', production);
+		console.log('production', production);
 
 		production = production.map((line) => {
 			let countOfActiveOrders = 0;
@@ -299,7 +299,10 @@ export default () => {
 					outputs,
 					inputs,
 				}
-            }
+			}
+
+			let productionLineCount = line.orders.filter(order => order.completed === 0).length;
+			utilization = count / productionLineCount;
 
 			outputs = line.orders.map((order) => {
 				if (order.completed > 0 || order.recurring != true) {
@@ -310,7 +313,13 @@ export default () => {
 
 				return order.outputs.map((output) => {
 					let ticker = output.material.ticker;
-					let amount = (output.amount * timesPerDay * count).toFixed(1);
+					let amount = 0;
+					if (line.orders.length == 1) {
+						amount = (output.amount * timesPerDay * count).toFixed(1);
+					} else {
+						//console.log(ticker, output.amount, timesPerDay, utilization, count, line.orders.length);
+						amount = (output.amount * timesPerDay * utilization).toFixed(1);
+                    }
 					return {
 						ticker,
 						amount,
@@ -330,8 +339,14 @@ export default () => {
 				timesPerDay = (24 / ((parseInt(order.duration.millis) / (1000 * 60 * 60 * 24)) * 24)).toFixed(3);
 				return order.inputs.map((input) => {
 					let ticker = input.material.ticker;
-					let amount = (input.amount * timesPerDay * count).toFixed(1);
-					console.log("!");
+					let amount = 0;
+					if (line.orders.length == 1) {
+						amount = amount = (input.amount * timesPerDay * count).toFixed(1);
+					} else {
+						console.log(ticker, input.amount, timesPerDay, utilization, count, line.orders.length);
+						amount = (input.amount * timesPerDay * utilization).toFixed(1);
+						//console.log("!");
+                    }
 					return {
 						ticker,
 						amount,
@@ -353,7 +368,7 @@ export default () => {
 			}
 		});
 
-		console.log("daily", daily);
+		//console.log("daily", daily);
 
 		let itemsToBurn = {};
 		daily.map((line) => {
@@ -378,7 +393,7 @@ export default () => {
 			});
 		});
 
-		console.log("itemsToBurn", itemsToBurn);
+		//console.log("itemsToBurn", itemsToBurn);
 
 		let inventoryOutput = [];
 		for (const [key, value] of Object.entries(itemsToBurn)) {
@@ -412,7 +427,7 @@ export default () => {
 			}
 		});
 
-		console.log("sites", sites);
+		//console.log("sites", sites);
 
 		return sites;
 	};
