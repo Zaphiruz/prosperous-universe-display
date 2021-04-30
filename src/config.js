@@ -1,3 +1,3 @@
 export default {
-	api: "https://api.prosperon.app//graphql"
+	api: "https://api.prosperon.app/graphql"
 }
