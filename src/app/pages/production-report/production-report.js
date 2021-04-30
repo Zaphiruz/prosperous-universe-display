@@ -189,7 +189,7 @@ export default () => {
 
 	const fetchCompany = async () => {
 		let company = await query(config.api, 'companyOne', { filter: { code: toUpper(companyId) } }, CompanyQuery);
-		console.log('company', company);
+		//console.log('company', company);
 		setCompany(company);
 		return company;
 	};
@@ -197,7 +197,7 @@ export default () => {
 	const fetchSites = async (company) => {
 		let ownerId = company.id;
 		let sites = await query(config.api, 'siteMany', { filter: { owner: ownerId } }, SiteQuery);
-		console.log("sites", sites);
+		//console.log("sites", sites);
 		setSites(sites);
 		return sites;
 	};
@@ -205,7 +205,7 @@ export default () => {
 	const fetchInventories = async (company) => {
 		let ownerId = company.id;
 		let inventories = await query(config.api, 'storageSiteMany', { filter: { owner: ownerId, type: "STORE" } }, InventoryQuerys);
-		console.log('inventories', inventories);
+		//console.log('inventories', inventories);
 		setInventories(inventories);
 		return inventories;
 	};
@@ -213,7 +213,7 @@ export default () => {
 	const fetchProduction = async (company) => {
 		let ownerId = company.id;
 		let production = await query(config.api, 'productionLineMany', { filter: { owner: ownerId } }, ProductionQuery);
-		console.log('production', production);
+		//console.log('production', production);
 
 		production = production.map((line) => {
 			let countOfActiveOrders = 0;
@@ -236,7 +236,7 @@ export default () => {
 
 			return line;
 		});
-		console.log('post production', production);
+		//console.log('post production', production);
 		setProduction(production);
 		return production;
 	};
@@ -301,15 +301,16 @@ export default () => {
 				}
             }
 
-			timesPerDay = (24 / ((parseInt(line.orders[0].duration.millis) / (1000 * 60 * 60 * 24)) * 24));
-			utilization = count / line.orders.length;
 			outputs = line.orders.map((order) => {
 				if (order.completed > 0 || order.recurring != true) {
 					return "";
 				};
+
+				timesPerDay = (24 / ((parseInt(order.duration.millis) / (1000 * 60 * 60 * 24)) * 24));
+
 				return order.outputs.map((output) => {
 					let ticker = output.material.ticker;
-					let amount = (output.amount * timesPerDay * utilization).toFixed(1);
+					let amount = (output.amount * timesPerDay * count).toFixed(1);
 					return {
 						ticker,
 						amount,
@@ -317,6 +318,7 @@ export default () => {
 				});
 			}).filter(Boolean);
 
+			// Check to see if we're getting more outputs than there are buildings. Happens if the items being produced don't show up as having a completion percent
 			if (outputs.length > count) {
 				console.log("ERROR!!!");
 			}
@@ -325,10 +327,11 @@ export default () => {
 				if (order.completed > 0 || order.recurring != true) {
 					return "";
 				};
-				timesPerDay = (24 / ((order.duration.millis / (1000 * 60 * 60 * 24)) * 24)).toFixed(3);
+				timesPerDay = (24 / ((parseInt(order.duration.millis) / (1000 * 60 * 60 * 24)) * 24)).toFixed(3);
 				return order.inputs.map((input) => {
 					let ticker = input.material.ticker;
-					let amount = (input.amount * timesPerDay).toFixed(1);
+					let amount = (input.amount * timesPerDay * count).toFixed(1);
+					console.log("!");
 					return {
 						ticker,
 						amount,
@@ -350,29 +353,32 @@ export default () => {
 			}
 		});
 
+		console.log("daily", daily);
+
 		let itemsToBurn = {};
 		daily.map((line) => {
-			if (line.orders) {
-				line.inputs.map((input) => {
-					input.map((item) => {
-						if (item.ticker in itemsToBurn)
-							itemsToBurn[item.ticker] -= parseFloat(item.amount);
-						else {
-							itemsToBurn[item.ticker] = -parseFloat(item.amount);
-						}
-					});
+			console.log("line", line);
+			line.inputs.map((input) => {
+				input.map((item) => {
+					if (item.ticker in itemsToBurn)
+						itemsToBurn[item.ticker] -= parseFloat(item.amount);
+					else {
+						itemsToBurn[item.ticker] = -parseFloat(item.amount);
+					}
 				});
-				line.outputs.map((output) => {
-					output.map((item) => {
-						if (item.ticker in itemsToBurn)
-							itemsToBurn[item.ticker] += parseFloat(item.amount);
-						else {
-							itemsToBurn[item.ticker] = parseFloat(item.amount);
-						}
-					});
+			});
+			line.outputs.map((output) => {
+				output.map((item) => {
+					if (item.ticker in itemsToBurn)
+						itemsToBurn[item.ticker] += parseFloat(item.amount);
+					else {
+						itemsToBurn[item.ticker] = parseFloat(item.amount);
+					}
 				});
-			}
+			});
 		});
+
+		console.log("itemsToBurn", itemsToBurn);
 
 		let inventoryOutput = [];
 		for (const [key, value] of Object.entries(itemsToBurn)) {
@@ -405,6 +411,8 @@ export default () => {
 				inventoryOutput,
 			}
 		});
+
+		console.log("sites", sites);
 
 		return sites;
 	};

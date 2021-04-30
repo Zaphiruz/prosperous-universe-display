@@ -5,12 +5,12 @@
     "\\src\\app",
     "\\src\\app\\pages",
     "\\src\\app\\pages\\home",
+    "\\src\\app\\pages\\planets",
     "\\src\\app\\pages\\production-report",
-    "\\src\\app\\pages\\shipping-calc",
     "\\src\\app\\partial",
     "\\src\\app\\partial\\nav",
     "\\src\\utils"
   ],
-  "SelectedNode": "\\src\\app\\pages\\production-report\\production-report.js",
+  "SelectedNode": "\\src\\app\\pages\\planets\\planet.js",
   "PreviewInSolutionExplorer": false
 }
