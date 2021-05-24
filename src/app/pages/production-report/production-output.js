@@ -25,7 +25,7 @@ const returnItem = (orders) => {
 
 	let final = []
     for (let [key, value] of Object.entries(output)) {
-		final.push(`${key}: ${value}`);
+		final.push(`${key}: ${value.toFixed(2)}`);
     }	
 	final = final.join(" | ");
 
