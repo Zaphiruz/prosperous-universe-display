@@ -100,6 +100,27 @@ const CompanyQuery = {
 	}
 };
 
+const BuildingOptionQuery = {
+	name: true,
+	ticker: true,
+	type: true,
+	area: true,
+	expertiseCategory: true,
+	needsFertileSoil: true,
+	workforceCapacities: {
+		level: true,
+		capacity: true,
+	},
+	materials: {
+		quantities: {
+			amount: true,
+			material: {
+				ticker: true,
+            }
+		},
+	},
+};
+
 const SiteQuery = {
 	siteId: true,
 	owner: {
@@ -261,21 +282,156 @@ export default () => {
 	let [error, setError] = useState('');
 	let [itemList, setItemList] = useState([]);
 
+	let [buildingOptions, setBuildingOptions] = useState([]);
+	let [tableData, setTableData] = useState([]);
+
+	const tableHeaders = [
+		{
+			header: null,
+			materialColumn: false,
+			columns: [
+				'Building',
+			]
+		},
+		{
+			header: null,
+			materialColumn: false,
+			columns: [
+				'Number',
+			]
+		},
+		{
+			header: 'Base',
+			materialColumn: false,
+			columns: [
+				'Area',
+			]
+		},
+		{
+			header: 'BFabs',
+			materialColumn: true,
+			columns: [
+				'BBH',
+				'BDE',
+				'BSE',
+				'BTA'
+			]
+		},
+		{
+			header: 'LFabs',
+			materialColumn: true,
+			columns: [
+				'LBH',
+				'LDE',
+				'LSE',
+				'LTA'
+			]
+		},
+		{
+			header: 'RFabs',
+			materialColumn: true,
+			columns: [
+				'RBH',
+				'RDE',
+				'RSE',
+				'RTA'
+			]
+		},
+		{
+			header: 'AFabs',
+			materialColumn: true,
+			columns: [
+				'ABH',
+				'ADE',
+				'ASE',
+				'ATA'
+			]
+		},
+		{
+			header: 'Other',
+			materialColumn: true,
+			columns: [
+				'TRU',
+			]
+		},
+		{
+			header: 'Planet',
+			materialColumn: true,
+			columns: [
+				'MCG',
+				'Gravity',
+				'Temp',
+				'Pressure'
+			]
+		},
+		{
+			header: null,
+			columns: [
+				'',
+			]
+		},
+	]
+
+	const fetchBuildingOptions = async () => {
+		let buildingOptions = await query(config.api, 'buildingOptionMany', { filter: {} }, BuildingOptionQuery);
+		setBuildingOptions(buildingOptions);
+	};
+
 	useEffect(async () => {
-		//let planets = await fetchPlanets();
-		//setPlanetResults(planets);
+		fetchBuildingOptions();
+
 	}, []);
 
 	const addItem = async (e) => {
-		console.log("Would have done something");
-	}
+		e.preventDefault();
+		e.stopPropagation();
+		clearErrors();
+
+		let ticker = e.target.elements.ticker.value.toUpperCase();
+		let num = parseInt(e.target.elements.count.value);
+		let option = buildingOptions.find(option => option.ticker === ticker);
+
+		if (option) {
+			tableData.push({ ticker: ticker, num: num, option: option });
+			console.log("tableData", tableData);
+			setTableData([...tableData]);
+
+			e.target.elements.ticker.value = '';
+			e.target.elements.count.value = '';
+        }
+
+	};
 
 	const removeItem = async (i, e) => {
 		console.log("Would have removed something");
-    }
+	};
 
 	const resetList = async (i, e) => {
 		console.log("Would have reset");
+	};
+
+	const onBuildingOptionChange = (e) => {
+		console.log("Something changed 1", e.target.value.toUpperCase());
+		if (e.target.value && e.target.value.length > 1) {
+
+			let option = buildingOptions.filter(option => option.ticker === e.target.value.toUpperCase());
+
+			if (option.length) {
+				console.log("Something changed", e.target.value.toUpperCase(), option);
+
+            }
+        }
+		
+	};
+
+	const updateRowCount = (item) => (e) => {
+		console.log("Would have updated a row's amount", e.target.value);
+		item.num = e.target.value;
+		setTableData([...tableData]);
+	};
+
+	const clearErrors = () => {
+		setError('');
 	}
 
 	return (
@@ -288,78 +444,107 @@ export default () => {
 						<table>
 							<thead>
 								<tr>
-									<td rowSpan="1"></td>
-									<td rowSpan="1"></td>
-									<td rowSpan="1"></td>
-									<th colSpan="4">BFabs</th>
-									<th colSpan="4">LFabs</th>
-									<th colSpan="4">RFabs</th>
-									<th colSpan="4">AFabs</th>
-									<th colSpan="4">Planet</th>
+
+									{
+										tableHeaders.map((item, i) => {
+											if (item.header) {
+												return <th colSpan={item.columns.length} key={"colHeader" + i}>{item.header}</th>
+											} else {
+												return <td rowSpan='1' key={"colHeader" + i}></td>;	
+                                            }
+                                        })
+                                    }
 								</tr>
 								<tr>
-									<th>Building</th>
-									<th>Number</th>
-									<th>Area</th>
-									<th>BBH</th>
-									<th>BDE</th>
-									<th>BSE</th>
-									<th>BTA</th>
-									<th>LBH</th>
-									<th>LDE</th>
-									<th>LSE</th>
-									<th>LTA</th>
-									<th>RBH</th>
-									<th>RDE</th>
-									<th>RSE</th>
-									<th>RTA</th>
-									<th>ABH</th>
-									<th>ADE</th>
-									<th>ASE</th>
-									<th>ATA</th>
-									<th>Ground</th>
-									<th>Gravity</th>
-									<th>Temp</th>
-									<th>Pressure</th>
-									<th>&nbsp;</th>
+
+									{
+										tableHeaders.flatMap((item, i) => {
+											return item.columns.map((subHeader) => {
+												return <th key={"colSubHeader" + subHeader}>{subHeader}</th>
+                                            })
+                                        })
+                                    }
 								</tr>
 							</thead>
 
 							<tbody>
-								{itemList.map((listItem, i) => (
-									<tr key={listItem.ticker}>
-										<td>building</td>
-										<td>num</td>
-										<td>area</td>
-										<td>bfab</td>
-										<td>bfab</td>
-										<td>bfab</td>
-										<td>bfab</td>
-										<td>lfab</td>
-										<td>lfab</td>
-										<td>lfab</td>
-										<td>lfab</td>
-										<td>rfab</td>
-										<td>rfab</td>
-										<td>rfab</td>
-										<td>rfab</td>
-										<td>afab</td>
-										<td>afab</td>
-										<td>afab</td>
-										<td>afab</td>
-										<td>planet</td>
-										<td>planet</td>
-										<td>planet</td>
-										<td>planet</td>
+								{tableData.map((item, i) => (
+									<tr key={"rowData" + item.ticker + i}>
+										<td>{item.ticker}</td>
 										<td>
-											<Button type='button'
-												className='bg-red-500 dark:bg-red-700 flex justify-center items-center'
-												size='sm'
-												onClick={(e) => removeItem(i, e)}
-											>
-												<span className="material-icons text-sm">clear</span>
-											</Button>
+											<input type='text'
+												id={"rowDataAmount" + item.ticker + i}
+												name={"rowDataAmount" + item.ticker + i}
+												className='mr-2'
+												required="required"
+												pattern='\d+'
+												placeholder='i.e. 2'
+												title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
+												value={item.num}
+												onChange = {updateRowCount(item)}
+											/>
 										</td>
+										<td>{item.option.area * item.num}</td>
+										
+										{tableHeaders.flatMap((tableHeader) => {
+											if (tableHeader.materialColumn) {
+												return tableHeader.columns.map((columnName) => {
+													let amount = 0;
+													let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+													if (materialQuantity) {
+														amount = materialQuantity.amount * item.num;
+													}
+													return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+												})
+											}
+											return [];
+										})}
+
+										{tableHeaders.find((headerData) => headerData.header === 'LFabs')?.columns.map((columnName) => {
+											let amount = 0;
+											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+											if (materialQuantity) {
+												amount = materialQuantity.amount * item.num;
+											}
+											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+										})}
+
+										{tableHeaders.find((headerData) => headerData.header === 'RFabs')?.columns.map((columnName) => {
+											let amount = 0;
+											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+											if (materialQuantity) {
+												amount = materialQuantity.amount * item.num;
+											}
+											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+										})}
+
+										{tableHeaders.find((headerData) => headerData.header === 'AFabs')?.columns.map((columnName) => {
+											let amount = 0;
+											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+											if (materialQuantity) {
+												amount = materialQuantity.amount * item.num;
+											}
+											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+										})}
+
+										{tableHeaders.find((headerData) => headerData.header === 'Other')?.columns.map((columnName) => {
+											let amount = 0;
+											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+											if (materialQuantity) {
+												amount = materialQuantity.amount * item.num;
+											}
+											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+										})}
+
+										{tableHeaders.find((headerData) => headerData.header === 'Planet')?.columns.map((columnName) => {
+											let amount = 0;
+											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
+											if (materialQuantity) {
+												amount = materialQuantity.amount * item.num;
+											}
+											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+										})}
+
 									</tr>
 								))}
 							</tbody>
@@ -368,19 +553,23 @@ export default () => {
 								<tr>
 									<td>
 										<input type='text'
-											tabIndex="1"
-											id='building'
-											name='building'
-											className='mr-2'
+											placeholder="i.e. HB1"
+											id='ticker'
+											list="opts"
 											required="required"
-											pattern='[a-zA-Z0-9]{1,3}'
-											placeholder='i.e. HB1'
-											title="Ticker should only contain 1-3 charactors. i.e. RAT, DW, H"
-										/>
+											title="Needs a building code, such as HB1 or PP1" />
+										<datalist id="opts">
+											{
+												buildingOptions.length && (
+													buildingOptions.map((item) => <option key={item.ticker} value={item.ticker}>{item.ticker}</option>) 
+												) || (
+													<option> TBD </option>
+												)
+                                            }
+										</datalist>
 									</td>
 									<td>
 										<input type='text'
-											tabIndex="2"
 											id='count'
 											name='count'
 											className='mr-2'
@@ -390,27 +579,26 @@ export default () => {
 											title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
 										/>
 									</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
-									<td>0</td>
+									<td>
+										<Button type='submit' className='flex justify-center items-center whitespace-nowrap bg-blue-700 bg-opacity-30 focus:text-bold focus:bg-opacity-100'>
+											<span className="material-icons">add</span> Add
+										</Button>
+									</td>
+								</tr>
+
+								<tr>
+									<td></td>
+									<td>Totals</td>
+									{
+										tableHeaders.flatMap((item) => {
+											if (item.header) {
+												return item.columns.map((column) => {
+													return <td key={"totalRow" + column}>{column}</td>
+												});
+											}
+											return [];
+										})
+									}
 								</tr>
 
 								<tr>
@@ -435,6 +623,7 @@ export default () => {
 					<h3>Add section on how far a planet is from CXs</h3>
 					<h3>Add section on how many workers you'll need for each type</h3>
 					<h3>Add area usage</h3>
+					<h3>Shift to Select from datalist</h3>
 				</div>
 
 				
