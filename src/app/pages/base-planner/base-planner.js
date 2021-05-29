@@ -592,9 +592,11 @@ export default () => {
 									{
 										tableHeaders.flatMap((item) => {
 											if (item.header) {
-												return item.columns.map((column) => {
-													return <td key={"totalRow" + column}>{column}</td>
-												});
+												if (tableData.length) {
+													return item.columns.map((column) => {
+														return <td key={"totalRow" + column}>{tableData.reduce((a, b) => ({ x: a[column] + b[column] }, 0))}</td>
+													});
+												}
 											}
 											return [];
 										})
