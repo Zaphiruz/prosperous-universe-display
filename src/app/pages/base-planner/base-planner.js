@@ -284,6 +284,8 @@ export default () => {
 
 	let [buildingOptions, setBuildingOptions] = useState([]);
 	let [tableData, setTableData] = useState([]);
+	let [totalData, setTotalData] = useState({});
+	let [planetData, setPlanetData] = useState([]);
 
 	const tableHeaders = [
 		{
@@ -378,9 +380,12 @@ export default () => {
 	};
 
 	useEffect(async () => {
-		fetchBuildingOptions();
-
+		await fetchBuildingOptions();
 	}, []);
+
+	useEffect(() => {
+		updateTotals();
+	}, [tableData]);
 
 	const addItem = async (e) => {
 		e.preventDefault();
@@ -408,6 +413,7 @@ export default () => {
 
 	const resetList = async (i, e) => {
 		console.log("Would have reset");
+		setTableData([]);
 	};
 
 	const onBuildingOptionChange = (e) => {
@@ -434,9 +440,117 @@ export default () => {
 		setError('');
 	}
 
+	const updateTotals = () => {
+		let totalData = tableData.reduce((totals, item) => {
+			let materials = item.option.materials.quantities;
+			let area = item.option.area;
+			let count = item.num;
+
+			for (let materialQuantity of materials) {
+				let ticker = materialQuantity.material.ticker;
+				let amount = materialQuantity.amount;
+
+				if (!totals[ticker]) {
+					totals[ticker] = 0;
+				}
+
+				totals[ticker] += (amount * count);
+			}
+
+			totals.area += (area * count);
+
+			return totals;
+		}, {area: 0});
+
+		setTotalData(totalData);
+	}
+
+	const onPlanetSelectionChange = async (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (!e.target.elements.planetFilterInput.value) {
+			return;
+        }
+
+		let planet = await query(config.api, 'planetOne', { filter: { naturalId: e.target.elements.planetFilterInput.value } }, PlanetQuery);
+
+		if (planet) {
+			setPlanetData(planet);
+			console.log(planet);
+        }
+	}
+
+	const returnPlanetDifficulty = () => {
+		if (!planetData || !planetData?.tier) {
+			return "";
+		}
+
+		let planetDifficulty = '';
+		if (planetData.tier.gravity !== 0) {
+			if (planetData.tier.gravity > 0) {
+				planetDifficulty += "High Gravity ";
+			}
+			else {
+				planetDifficulty += "Low Gravity ";
+			}
+		}
+
+		if (planetData.tier.temperature !== 0) {
+			if (planetData.tier.gravity > 0) {
+				planetDifficulty += "High Temperature ";
+			}
+			else {
+				planetDifficulty += "Low Temperature ";
+			}
+		}
+
+		if (planetData.tier.pressure !== 0) {
+			if (planetData.tier.gravity > 0) {
+				planetDifficulty += "High Pressure ";
+			}
+			else {
+				planetDifficulty += "Low Pressure ";
+			}
+		}
+
+		if (!planetDifficulty) {
+			planetDifficulty = "Normal";
+		}
+		
+		return planetDifficulty;
+	};
+
 	return (
 		<div className='base-planning container mx-auto p-3'>
-			<h1 className='text-xl capitalize inline-block'>Base Planner</h1>
+			<h1 className='text-xl capitalize inline-block mb-10'>Base Planner</h1>
+
+			<div className='mb-3'>
+				<h3>Planet Selector</h3>
+
+				<form onSubmit={onPlanetSelectionChange}>
+					<strong> Planet: </strong>
+					<input type='text'
+						id='planetFilterInput'
+						name='planetFilterInput'
+						className="mr-2 text-white"
+						pattern='[a-zA-Z0-9._-]{7,8}'
+						placeholder='i.e. OT-580b'
+						title="Planet code, like OT-580b"
+					/>
+
+					<button type='submit'>
+						<span className="material-icons">&nbsp; add_circle_outline</span>
+					</button>
+				</form>
+			</div>
+
+			<div>
+				<h3>Name: {planetData?.name}</h3>
+				<h3>ID: {planetData?.naturalId}</h3>
+				<h3>Resources: {planetData?.data?.resources?.map((item) => { return item.material.ticker; }).join(', ')}</h3>
+				<h3>Difficulty: {returnPlanetDifficulty()}</h3>
+			</div>
 
 			<div className='lg:flex'>
 				<div className='w-4/5 lg:mr-4'>
@@ -494,57 +608,11 @@ export default () => {
 													if (materialQuantity) {
 														amount = materialQuantity.amount * item.num;
 													}
-													return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
+													return <td key={'rowValue' + columnName + item.ticker + i}>{amount || ""}</td>;
 												})
 											}
 											return [];
 										})}
-
-										{tableHeaders.find((headerData) => headerData.header === 'LFabs')?.columns.map((columnName) => {
-											let amount = 0;
-											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
-											if (materialQuantity) {
-												amount = materialQuantity.amount * item.num;
-											}
-											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
-										})}
-
-										{tableHeaders.find((headerData) => headerData.header === 'RFabs')?.columns.map((columnName) => {
-											let amount = 0;
-											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
-											if (materialQuantity) {
-												amount = materialQuantity.amount * item.num;
-											}
-											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
-										})}
-
-										{tableHeaders.find((headerData) => headerData.header === 'AFabs')?.columns.map((columnName) => {
-											let amount = 0;
-											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
-											if (materialQuantity) {
-												amount = materialQuantity.amount * item.num;
-											}
-											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
-										})}
-
-										{tableHeaders.find((headerData) => headerData.header === 'Other')?.columns.map((columnName) => {
-											let amount = 0;
-											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
-											if (materialQuantity) {
-												amount = materialQuantity.amount * item.num;
-											}
-											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
-										})}
-
-										{tableHeaders.find((headerData) => headerData.header === 'Planet')?.columns.map((columnName) => {
-											let amount = 0;
-											let materialQuantity = item.option.materials.quantities.find((materialQuantity) => materialQuantity.material.ticker === columnName)
-											if (materialQuantity) {
-												amount = materialQuantity.amount * item.num;
-											}
-											return <td key={'rowValue' + columnName + item.ticker + i}>{amount}</td>;
-										})}
-
 									</tr>
 								))}
 							</tbody>
@@ -589,18 +657,17 @@ export default () => {
 								<tr>
 									<td></td>
 									<td>Totals</td>
-									{
-										tableHeaders.flatMap((item) => {
-											if (item.header) {
-												if (tableData.length) {
-													return item.columns.map((column) => {
-														return <td key={"totalRow" + column}>{tableData.reduce((a, b) => ({ x: a[column] + b[column] }, 0))}</td>
-													});
-												}
+									<td>{totalData.area || ""}</td>
+
+									{tableHeaders.flatMap((tableHeader, i) => {
+											if (tableHeader.materialColumn) {
+												return tableHeader.columns.map((columnName) => {
+													let amount = totalData[columnName];
+													return <td key={'totalRowValue' + columnName + i}>{amount}</td>;
+												})
 											}
 											return [];
-										})
-									}
+									})}
 								</tr>
 
 								<tr>
@@ -617,7 +684,7 @@ export default () => {
 
 						</table>
 					</form>
-					<h3>Add totals</h3>
+					<h3>Hide not used Fab type</h3>
 					<h3>Add planet selection</h3>
 					<h3>Add save/load</h3>
 					<h3>Add costs - Corp pricing? CX?</h3>
@@ -626,6 +693,7 @@ export default () => {
 					<h3>Add section on how many workers you'll need for each type</h3>
 					<h3>Add area usage</h3>
 					<h3>Shift to Select from datalist</h3>
+					<h3>Load an existing base into the page</h3>
 				</div>
 
 				

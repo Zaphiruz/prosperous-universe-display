@@ -3,14 +3,14 @@
     "",
     "\\src",
     "\\src\\app",
-    "\\src\\app\\components",
     "\\src\\app\\pages",
+    "\\src\\app\\pages\\base-planner",
     "\\src\\app\\pages\\consumption-report",
     "\\src\\app\\pages\\corp-report",
     "\\src\\app\\pages\\planets",
     "\\src\\app\\pages\\production-report",
     "\\src\\app\\pages\\shipping-calc"
   ],
-  "SelectedNode": "\\src\\app\\pages\\shipping-calc\\shipping-calc.js",
+  "SelectedNode": "\\src\\app\\pages\\base-planner\\base-planner.js",
   "PreviewInSolutionExplorer": false
 }
