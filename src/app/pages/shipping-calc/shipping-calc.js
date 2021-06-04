@@ -31,7 +31,7 @@ export default () => {
 		clearErrors();
 
 		let addCount = parseInt(newCount.current.value);
-		let addMaterial = newMaterial.current.value;
+		let addMaterial = newMaterial.current.value.toUpperCase();
 
 		let previousItem = itemList.find(item => item.ticker === addMaterial) 
 		if (previousItem) {

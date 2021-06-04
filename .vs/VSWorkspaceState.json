@@ -4,13 +4,13 @@
     "\\src",
     "\\src\\app",
     "\\src\\app\\pages",
-    "\\src\\app\\pages\\home",
+    "\\src\\app\\pages\\base-planner",
+    "\\src\\app\\pages\\consumption-report",
+    "\\src\\app\\pages\\corp-report",
     "\\src\\app\\pages\\planets",
     "\\src\\app\\pages\\production-report",
-    "\\src\\app\\partial",
-    "\\src\\app\\partial\\nav",
-    "\\src\\utils"
+    "\\src\\app\\pages\\shipping-calc"
   ],
-  "SelectedNode": "\\src\\app\\pages\\planets\\planet.js",
+  "SelectedNode": "\\src\\app\\pages\\base-planner\\base-planner.js",
   "PreviewInSolutionExplorer": false
 }

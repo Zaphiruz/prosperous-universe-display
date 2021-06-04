@@ -96,6 +96,7 @@ export default () => {
 	let [distanceTarget, setDistanceTarget] = useState('Moria');
 	let [paginationPage, setPaginationPage] = useState(1);
 	let [paginationMax, setPaginationMax] = useState(-1);
+	let [pageLoadState, setPageLoadState] = useState(0);
 	let materialFilterRef = useRef('');
 	let tierFilterRef = useRef('');
 	//let fertilityFilterRef = useRef('');
@@ -140,7 +141,14 @@ export default () => {
 		setPaginationPage(filteredPlanets.pageInfo.currentPage);
 		setPaginationMax(filteredPlanets.pageInfo.pageCount);
 		filteredPlanets = filteredPlanets.items.filter((planet) => !!planet.data.resources.length);
-		setPlanetResults(filteredPlanets);
+
+		if (filteredPlanets.length > 0) {
+			setPageLoadState(1);
+			setPlanetResults(filteredPlanets);
+		} else {
+			setPageLoadState(-1);
+        }
+		
 		console.log("FilteredPlanets", filteredPlanets);
     }
 
@@ -156,16 +164,15 @@ export default () => {
 		let pageCount = 50;
 		if ((e === -1 && paginationPage === 1) || paginationMax === -1) {
 			return;
-		}
-		else if (e === -10) {
+		} else if (e === -10) {
 			setPaginationPage(1);
 			paginateQuery(1, pageCount);
-		}
-		else if (e === 10) {
+		} else if (e === 10) {
 			setPaginationPage(paginationMax);
 			paginateQuery(paginationMax, pageCount);
-        }
-		else {
+		} else if (e + paginationPage > paginationMax) {
+			return;
+        } else {
 			setPaginationPage(paginationPage + e);
 			paginateQuery(paginationPage + e, pageCount);
         }
@@ -201,7 +208,7 @@ export default () => {
 			<div>
 				<form onSubmit={onSubmitClick}>
 					<label>
-						<strong> Filter:</strong>
+						<strong> Filter: </strong>
 						<input type='text'
 							id='materialFilter'
 							name='materialFilter'
@@ -221,23 +228,27 @@ export default () => {
 							<option key="0" value="0" className="text-black">0</option>
 						</select>
 
-						<strong> Target </strong>
+						{/*
+						<strong> Target: </strong>
 						<select className="text-white" id='targetFilter' ref={targetFilterRef}>
 							<option key="Moria" value="Moria" className="text-black">Moria</option>
 							<option key="Hortus" value="Hortus" className="text-black">Hortus</option>
 							<option key="Benten" value="Benten" className="text-black">Benten</option>
 							<option key="Antares" value="Antares" className="text-black">Antares</option>
 						</select>
+						*/}
 
 					</label>
 
 					<button type='submit'>
-						<span className="material-icons">add_circle_outline</span>
+						<span className="material-icons">&nbsp; add_circle_outline</span>
 					</button>
 				</form>
 
 			</div>
-			{planetResults.length && (
+			{pageLoadState === -1 && (
+				<h3>There are no planets that match this filter!</h3>	
+			) || planetResults.length && (
 				<div className=''>
 					{planetResults.map(planet => (
 						<PlanetVisual planet={planet} target={targetFilterRef.current.value} key={planet.naturalId} />

@@ -14,10 +14,16 @@ export default () => (
 				<Link className='mx-2 font-bold' to="/production-report">Production Report</Link>
 			</li>
 			<li>
+				<Link className='mx-2 font-bold' to="/corp-report">Corp Report</Link>
+			</li>
+			<li>
 				<Link className='mx-2 font-bold' to="/shipping-calc">Shipping Calc</Link>
 			</li>
 			<li>
 				<Link className='mx-2 font-bold' to="/planets">Planets</Link>
+			</li>
+			<li>
+				<Link className='mx-2 font-bold' to="/base-planner">Base Planner</Link>
 			</li>
 		</ul>
 	</nav>

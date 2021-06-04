@@ -1,5 +1,11 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# User defined filese
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
 # compiled output
 /dist
 /tmp
@@ -37,6 +43,9 @@ bower_components
 *.launch
 .settings/
 *.sublime-workspace
+
+# IDE - VS
+.vs/
 
 # IDE - VSCode
 .vscode/*

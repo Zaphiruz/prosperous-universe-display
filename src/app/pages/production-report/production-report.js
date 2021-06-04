@@ -47,7 +47,8 @@ const SiteQuery = {
 		entity: {
 			name: true,
 		}
-    },
+	},
+	updatedAt: true,
 }
 
 const InventoryQuerys = {
@@ -176,7 +177,8 @@ const ProductionQuery = {
 		expertiseCategory: true,
 		type: true,
 		value: true		
-    }
+	},
+	updatedAt: true,
 };
 
 export default () => {
@@ -213,7 +215,7 @@ export default () => {
 	const fetchProduction = async (company) => {
 		let ownerId = company.id;
 		let production = await query(config.api, 'productionLineMany', { filter: { owner: ownerId } }, ProductionQuery);
-		console.log('production', production);
+		//console.log('production', production);
 
 		production = production.map((line) => {
 			let countOfActiveOrders = 0;
@@ -267,6 +269,8 @@ export default () => {
 			};
 		});
 
+		console.log("Pairs", pairs);
+
 		return pairs;
 	};
 
@@ -278,7 +282,7 @@ export default () => {
 			let id = line.id;
 			let type = line.type;
 			let workforce = line.workforce;
-			let efficiency = parseFloat(line.effectivity);
+			let efficiency = parseFloat(line.efficiency);
 			let count = line.capacity;
 
 			let timesPerDay = null;
@@ -343,9 +347,8 @@ export default () => {
 					if (line.orders.length == 1) {
 						amount = amount = (input.amount * timesPerDay * count).toFixed(1);
 					} else {
-						console.log(ticker, input.amount, timesPerDay, utilization, count, line.orders.length);
+						//console.log(ticker, input.amount, timesPerDay, utilization, count, line.orders.length);
 						amount = (input.amount * timesPerDay * utilization).toFixed(1);
-						//console.log("!");
                     }
 					return {
 						ticker,
@@ -373,24 +376,30 @@ export default () => {
 		let itemsToBurn = {};
 		daily.map((line) => {
 			console.log("line", line);
-			line.inputs.map((input) => {
-				input.map((item) => {
-					if (item.ticker in itemsToBurn)
-						itemsToBurn[item.ticker] -= parseFloat(item.amount);
-					else {
-						itemsToBurn[item.ticker] = -parseFloat(item.amount);
-					}
+
+			if ("inputs" in line && line.inputs) {
+				line.inputs.map((input) => {
+					input.map((item) => {
+						if (item.ticker in itemsToBurn)
+							itemsToBurn[item.ticker] -= parseFloat(item.amount);
+						else {
+							itemsToBurn[item.ticker] = -parseFloat(item.amount);
+						}
+					});
 				});
-			});
-			line.outputs.map((output) => {
-				output.map((item) => {
-					if (item.ticker in itemsToBurn)
-						itemsToBurn[item.ticker] += parseFloat(item.amount);
-					else {
-						itemsToBurn[item.ticker] = parseFloat(item.amount);
-					}
+			}
+
+			if ("outputs" in line && line.outputs) {
+				line.outputs.map((output) => {
+					output.map((item) => {
+						if (item.ticker in itemsToBurn)
+							itemsToBurn[item.ticker] += parseFloat(item.amount);
+						else {
+							itemsToBurn[item.ticker] = parseFloat(item.amount);
+						}
+					});
 				});
-			});
+            }
 		});
 
 		//console.log("itemsToBurn", itemsToBurn);
@@ -398,32 +407,35 @@ export default () => {
 		let inventoryOutput = [];
 		for (const [key, value] of Object.entries(itemsToBurn)) {
 			let amountInInv = inventory?.items.find(item => item.quantity.material.ticker === key)?.quantity.amount || 0;
+
 			if (value > 0) {
-				inventoryOutput.push({ material: key, daysRemaining: "Growing at " + value.toFixed(1) + " per day", currentAmount: amountInInv });
+				inventoryOutput.push({ material: key, daysRemaining: "Growing at " + value.toFixed(1) + " per day", currentAmount: amountInInv, changeAmount: value.toFixed(1), direction: 1 });
 			}
 			else if (amountInInv === 0) {
-				inventoryOutput.push({ material: key, daysRemaining: "0", currentAmount: amountInInv });
+				inventoryOutput.push({ material: key, daysRemaining: "0", currentAmount: amountInInv, changeAmount: 0, direction: 0 });
 			}
 			else if (value < 0) {
 				let daysLeft = amountInInv / Math.abs(value);
-				inventoryOutput.push({ material: key, daysRemaining: daysLeft.toFixed(1) + " days left", currentAmount: amountInInv });
+				inventoryOutput.push({ material: key, daysRemaining: daysLeft.toFixed(1) + " days left", currentAmount: amountInInv, changeAmount: daysLeft.toFixed(1), direction: -1 });
 			}
 			else {
-				inventoryOutput.push({ material: key, daysRemaining: "No change", currentAmount: amountInInv });
+				inventoryOutput.push({ material: key, daysRemaining: "No change", currentAmount: amountInInv, changeAmount: 0, direction: 0});
 			}
 		}
 
 		let siteIds = _.uniqBy(daily, 'siteId').map((line) => { return line.siteId });
 
-		let sites = siteIds.map((site) => {
+		let sites = siteIds.map((siteById) => {
 			let lines = daily.filter((line) => {
-				return line.siteId === site;
+				return line.siteId === siteById;
 			});
 			let inventories = {};
+			let updatedAt = site.updatedAt;
 			return {
 				lines,
 				inventories,
 				inventoryOutput,
+				updatedAt,
 			}
 		});
 
@@ -440,15 +452,23 @@ export default () => {
 			fetchSites(company),
 		]);
 		let reports = correlate(datas)
-			.map(reportForLocation)
-		setReports(reports[0]);
+			.map(reportForLocation);
+		console.log("reports", reports);
+		setReports(reports);
 	}, []);
 
 	return (
 		<div className='consuption-report container mx-auto p-3'>
-			<div>
-				<h1 className='text-xl capitalize inline-block'>Production report - page loading...</h1>
-			</div>
+
+			{reports.length && (
+				<div>
+					<h1 className='text-xl capitalize inline-block'>Production report - {companyId}</h1>
+				</div>
+			) || (
+				<div>
+					<h1 className='text-xl capitalize inline-block'>Production report - page loading...</h1>
+				</div>
+			)}
 
 			<div>
 				<small>Please note: This is only working on reoccuring orders only at the moment...</small>
@@ -456,8 +476,10 @@ export default () => {
 
 			{reports.length && (
 				<div>
-					{reports.map(site => (
-						<ProductionSite site={site} key={site.lines[0].siteId} />
+					{reports.map(sites => (
+						sites.map(site => (
+							<ProductionSite site={site} key={site.lines[0].siteId} />
+						))
 					))}
 				</div>
 			) || (
