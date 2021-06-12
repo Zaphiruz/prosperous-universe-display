@@ -47,7 +47,8 @@ const SiteQuery = {
 		entity: {
 			name: true,
 		}
-    },
+	},
+	updatedAt: true,
 }
 
 const InventoryQuerys = {
@@ -176,7 +177,8 @@ const ProductionQuery = {
 		expertiseCategory: true,
 		type: true,
 		value: true		
-    }
+	},
+	updatedAt: true,
 };
 
 export default () => {
@@ -267,7 +269,7 @@ export default () => {
 			};
 		});
 
-		//console.log("Pairs", pairs);
+		console.log("Pairs", pairs);
 
 		return pairs;
 	};
@@ -373,9 +375,9 @@ export default () => {
 
 		let itemsToBurn = {};
 		daily.map((line) => {
-			//console.log("line", line);
+			console.log("line", line);
 
-			if ("inputs" in line) {
+			if ("inputs" in line && line.inputs) {
 				line.inputs.map((input) => {
 					input.map((item) => {
 						if (item.ticker in itemsToBurn)
@@ -387,7 +389,7 @@ export default () => {
 				});
 			}
 
-			if ("outputs" in line) {
+			if ("outputs" in line && line.outputs) {
 				line.outputs.map((output) => {
 					output.map((item) => {
 						if (item.ticker in itemsToBurn)
@@ -423,15 +425,17 @@ export default () => {
 
 		let siteIds = _.uniqBy(daily, 'siteId').map((line) => { return line.siteId });
 
-		let sites = siteIds.map((site) => {
+		let sites = siteIds.map((siteById) => {
 			let lines = daily.filter((line) => {
-				return line.siteId === site;
+				return line.siteId === siteById;
 			});
 			let inventories = {};
+			let updatedAt = site.updatedAt;
 			return {
 				lines,
 				inventories,
 				inventoryOutput,
+				updatedAt,
 			}
 		});
 
