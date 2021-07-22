@@ -42,7 +42,7 @@ export default ({ need }) => {
 				
 
 				<div className='m-1'>
-					<dt>Days until hunger strikes:</dt>
+					<dt>Days until worker strikes:</dt>
 					<dd>{need.intervalsSatisfied.toFixed(2)}</dd>
 				</div>
 			</dl>
