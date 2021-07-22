@@ -219,6 +219,7 @@ export default () => {
 				<input type='text'
 					id='conditionTreshhold'
 					ref={threshholdInput}
+					defaultValue={threshhold * 100}
 					pattern='\s*(100|\d{1,2})\s*'
 					placeholder='i.e. 100'
 					title="Count should only be positive, whole numbers between 0 and 100 i.e. 1, 55, 100,"
