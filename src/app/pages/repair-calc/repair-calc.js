@@ -109,7 +109,8 @@ export default () => {
 
 	const fetchPrices = async (totaledSites) => {
 		let allMaterials = totaledSites.flatMap(site => site.totalMaterials.map(item => `${item.ticker}.${market}`));
-		let materialsToFetch = uniq(allMaterials).filter(ticker => !pricesCache.some(item => item.ticker === ticker)); // only fetch stuff that hasnt been fetched
+		let materialsToFetch = uniq(allMaterials).filter(ticker => !pricesCache.some(item => `${item.material.ticker}.${market}` === ticker)); // only fetch stuff that hasnt been fetched
+
 		if (!materialsToFetch.length) {
 			return pricesCache;
 		}
