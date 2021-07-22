@@ -81,7 +81,7 @@ export default () => {
 	let [ market, setMarket ] = useState('NC1');
 	let [ filteredSites, setFilteredSites ] = useState([]);
 	let [ pricesCache, setPricesCache ] = useState([]);
-	let threshholdInput = useRef(95);
+	let threshholdInput = useRef('95');
 	let marketSelector = useRef('NC1');
 
 	const fetchCompany = async () => {
@@ -135,7 +135,8 @@ export default () => {
 				prevousEntry.amount++;
 
 				// material counts
-				for (let { amount, material: { ticker } } of building.repairMaterials) {
+				for (let { amount, material } of building.repairMaterials) {
+					let ticker = material?.ticker;
 					let prevousEntry = totalMaterials.find(obj => obj.ticker === ticker);
 					if (!prevousEntry) {
 						prevousEntry = {
@@ -238,13 +239,15 @@ export default () => {
 						<h3 className='text-lg capitalize inline-block'>{getAddressStringFor(site.address)}</h3>
 			
 						<div className='grid grid-flow-row grid-cols-3 md:grid-cols-4 lg:gird-cols-6 gap-2 mt-1 mb-2'>
-							{site.totalMaterials.map(({ticker, amount, cost, currency}) => (
+							{site.totalMaterials.length && (site.totalMaterials.map(({ticker, amount, cost, currency}) => (
 								<div key={"totalRepairMaterial-"+ticker}>
 									<p>Material: {ticker}</p>
 									<p>Amount: {amount}</p>
 									<p>Cost: {new Intl.NumberFormat().format(cost)} {currency}</p>
 								</div>
-							))}
+							))) || (
+								<p>No Repairs Needed</p>
+							)}
 						</div>
 
 						<div className="my-2">
@@ -253,7 +256,7 @@ export default () => {
 									return parseFloat(cost)
 								})
 									.toFixed(2)
-							)} {site.totalMaterials[0].currency}</strong>
+							)} {site.totalMaterials[0]?.currency}</strong>
 						</div>
 						
 						
