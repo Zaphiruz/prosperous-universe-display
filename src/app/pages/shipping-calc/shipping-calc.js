@@ -3,6 +3,7 @@ import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
 import { toUpper } from 'lodash';
 import './shipping-calc.less';
+import LocalStorageHelper from 'UTILS/localstorage-helper';
 
 import Button from 'COMPONENTS/button';
 
@@ -11,6 +12,8 @@ export default () => {
 	let [ currentVolume, setCurrentVolume ] = useState(0);
 	let newMaterial = useRef('');
 	let newCount = useRef('');
+
+	let [ saveSlot, setSaveSlot ] = useState('default');
 
 	let [ error, setError ] = useState('');
 	let [ itemList, setItemList ] = useState([]);
@@ -23,7 +26,33 @@ export default () => {
 
 	useEffect(() => {
 		newMaterial.current.focus();
-	 }, []);
+
+		loadFromStore();
+	}, []);
+
+	const loadFromStore = (e) => {
+		e?.preventDefault();
+		e?.stopPropagation();
+		clearErrors();
+
+		let saveSlot = e?.currentTarget.value ?? saveSlot ?? 'default';
+
+		let key = `shipping-calc-save-${saveSlot}`;
+		let data = LocalStorageHelper.loadRecord(key);
+		if (data) {
+			setItemList(data);
+		} else {
+			setItemList([]);
+		}
+
+		setSaveSlot(saveSlot);
+	}
+
+	const saveToStore = (list) => {
+		let key = `shipping-calc-save-${saveSlot}`;
+		let data = LocalStorageHelper.saveRecord(key, list);
+		setItemList(list);
+	}
 
 	const addItem = async (e) => {
 		e.preventDefault();
@@ -55,7 +84,7 @@ export default () => {
 			itemList.push({ ticker: toUpper(addMaterial), amount: count, weight, volume, material })
 		}
 
-		setItemList([...itemList]);
+		saveToStore([...itemList]);
 		clearInputs();
 		newMaterial.current.focus();
 	}
@@ -77,7 +106,7 @@ export default () => {
 
 		itemList.splice(i, 1);
 
-		setItemList([...itemList]);
+		saveToStore([...itemList]);
 	}
 
 	const computeCurrentValues = (itemLists) => {
@@ -98,7 +127,7 @@ export default () => {
 		clearErrors();
 		clearInputs();
 
-		setItemList([]);
+		saveToStore([]);
 	}
 
 	const clearErrors = () => {
@@ -116,7 +145,20 @@ export default () => {
 
 	return (
 		<div className='shipping-calc container mx-auto p-3'>
-			<h1 className='text-xl capitalize inline-block'>Shipping Calculator</h1>
+			<h1 className='text-xl capitalize inline-block'>
+				Shipping Calculator
+				<label htmlFor="save-slot" className="ml-10">Save Slot</label>
+				<select
+					id="save-slot"
+					defaultValue={saveSlot}
+					onChange={loadFromStore}
+				>
+					<option value='default'>Default</option>
+					<option value='s1'>Save 1</option>
+					<option value='s2'>Save 2</option>
+					<option value='s3'>Save 3</option>
+				</select>
+			</h1>
 
 			<div className='lg:flex'>
 				<div className='w-4/5 lg:mr-4'>
