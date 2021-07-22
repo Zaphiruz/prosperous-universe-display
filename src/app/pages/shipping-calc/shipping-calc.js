@@ -36,7 +36,7 @@ export default () => {
 
 		let previousItem = itemList.find(item => item.ticker === addMaterial) 
 		if (previousItem) {
-			let count = previousItem.amount + isFill ? fillWith(previousItem.material.weight, previousItem.material.volume) : addCount;
+			let count = previousItem.amount + (isFill ? fillWith(previousItem.material.weight, previousItem.material.volume) : addCount);
 
 			previousItem.amount = count
 			previousItem.weight = previousItem.material.weight * count;
@@ -176,7 +176,7 @@ export default () => {
 											required="required"
 											pattern='^(\d+|[Ff]ill)$'
 											ref={newCount}
-											placeholder='i.e. 100'
+											placeholder='i.e. 100, &quot;Fill&quot;'
 											list="count-list"
 											title="Count should only be positive numbers or &quot;Fill&quot; i.e. 1, 12, 123, 1234"
 										/>
