@@ -7,6 +7,7 @@ import './consumption-report.less';
 
 import ConsumtionSite from './consumption-site';
 import Loading from 'COMPONENTS/loading';
+import CompanyBadge from 'COMPONENTS/company-badge';
 
 const CompanyQuery = {
 	id: true,
@@ -185,8 +186,7 @@ export default () => {
 
 	return (
 		<div className='consuption-report container mx-auto p-3'>
-			<small className='text-gray-500 dark:text-gray-400 mr-2'>{toUpper(company?.code)}</small>
-			<h1 className='text-xl capitalize inline-block'>{startCase(company?.name)}</h1>
+			<CompanyBadge company={company} />
 
 			{reports.length && (
 				<div>

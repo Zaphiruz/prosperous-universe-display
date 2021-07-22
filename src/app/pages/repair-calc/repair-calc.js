@@ -7,6 +7,7 @@ import './repair-calc.less';
 
 import Button from 'COMPONENTS/button';
 import { MarketSelector } from 'COMPONENTS/currency-market-selectors';
+import CompanyBadge from 'COMPONENTS/company-badge';
 
 //#region queries
 const CompanyQuery = {
@@ -214,6 +215,8 @@ export default () => {
 
 	return (
 		<section className='repair-calc container mx-auto p-3'>
+			<CompanyBadge company={company} className='block pb-3'/>
+
 			<form onSubmit={adjustThreshhold}>
 				<label htmlFor='conditionTreshhold'>Condition Threshhold</label>
 				<input type='text'
