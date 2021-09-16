@@ -25,3 +25,19 @@ export const CurrencySelector = React.forwardRef(({ id }, ref) => (
 		</select>
 	</div>
 ))
+
+export const CurrecyToMarket = {
+	NCC: 'NC1', NC1: 'NC1',
+	ICA: 'IC1', IC1: 'IC1',
+	AIC: 'AI1', AI1: 'AI1',
+	CIS: 'CI1', CI1: 'CI1',
+	ECD: 'EC1', EC1: 'EC1'
+}
+
+export const MarketToCurrency = {
+	NCC: 'NCC', NC1: 'NCC',
+	ICA: 'ICA', IC1: 'ICA',
+	AIC: 'AIC', AI1: 'AIC',
+	CIS: 'CIS', CI1: 'CIS',
+	ECD: 'ECD', EC1: 'ECD'
+}

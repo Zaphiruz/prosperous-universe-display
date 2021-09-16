@@ -6,7 +6,7 @@ import config from 'ROOT/config';
 import './repair-calc.less';
 
 import Button from 'COMPONENTS/button';
-import { MarketSelector } from 'COMPONENTS/currency-market-selectors';
+import { MarketSelector, MarketToCurrency, CurrecyToMarket } from 'COMPONENTS/currency-market-selectors';
 import CompanyBadge from 'COMPONENTS/company-badge';
 
 //#region queries
@@ -108,9 +108,9 @@ export default () => {
 		return filteredSitePlatforms;
 	}
 
-	const fetchPrices = async (totaledSites) => {
+	const fetchPrices = async (totaledSites, market) => {
 		let allMaterials = totaledSites.flatMap(site => site.totalMaterials.map(item => `${item.ticker}.${market}`));
-		let materialsToFetch = uniq(allMaterials).filter(ticker => !pricesCache.some(item => `${item.material.ticker}.${market}` === ticker)); // only fetch stuff that hasnt been fetched
+		let materialsToFetch = uniq(allMaterials).filter(ticker => !pricesCache.some(item => `${item.material.ticker}.${CurrecyToMarket[item.priceAverage.currency]}` === ticker)); // only fetch stuff that hasnt been fetched
 
 		if (!materialsToFetch.length) {
 			return pricesCache;
@@ -164,10 +164,10 @@ export default () => {
 		return totaledSites;
 	}
 
-	const assignPrices = (filteredSites, prices) => {
+	const assignPrices = (filteredSites, prices, market) => {
 		let pricedSites = filteredSites.map(site => {
 			let totalPrice = site.totalMaterials.map(({ ticker, amount }) => {
-				let priceData = prices.find(price => price.material.ticker === ticker);
+				let priceData = prices.find(price => price.material.ticker === ticker && price.priceAverage.currency === MarketToCurrency[market]);
 				let currency = priceData?.priceAverage.currency;
 				let cost = (priceData?.priceAverage.amount * amount).toFixed(2)
 
@@ -197,8 +197,8 @@ export default () => {
 	useEffect(async () => {
 		let filteredSitePlatforms = filterByThreshold();
 		let totaledSites = sumMaterialsForSite(filteredSitePlatforms);
-		let prices = await fetchPrices(totaledSites);
-		let pricedSites = assignPrices(totaledSites, prices);
+		let prices = await fetchPrices(totaledSites, market);
+		let pricedSites = assignPrices(totaledSites, prices, market);
 	}, [sites, threshhold, market]);
 
 	const adjustThreshhold = (e) => {
