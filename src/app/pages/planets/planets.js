@@ -172,10 +172,10 @@ export default () => {
 			paginateQuery(paginationMax, pageCount);
 		} else if (e + paginationPage > paginationMax) {
 			return;
-        } else {
+		} else {
 			setPaginationPage(paginationPage + e);
 			paginateQuery(paginationPage + e, pageCount);
-        }
+		}
     }
 
 	// Show what would take to build on the planet
