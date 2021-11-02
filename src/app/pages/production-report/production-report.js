@@ -7,6 +7,7 @@ import './production-report.less';
 
 import ProductionSite from './production-site';
 import Loading from 'COMPONENTS/loading';
+import CompanyBadge from 'COMPONENTS/company-badge';
 
 const CompanyQuery = {
 	id: true,
@@ -462,7 +463,7 @@ export default () => {
 
 			{reports.length && (
 				<div>
-					<h1 className='text-xl capitalize inline-block'>Production report - {companyId}</h1>
+					<h1 className='text-xl capitalize inline-block'>Production report - <CompanyBadge company={company} /></h1>
 				</div>
 			) || (
 				<div>

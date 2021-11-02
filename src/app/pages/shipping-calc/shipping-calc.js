@@ -3,6 +3,7 @@ import { query } from 'UTILS/graphql-query-helper';
 import config from 'ROOT/config';
 import { toUpper } from 'lodash';
 import './shipping-calc.less';
+import LocalStorageHelper from 'UTILS/localstorage-helper';
 
 import Button from 'COMPONENTS/button';
 
@@ -11,6 +12,8 @@ export default () => {
 	let [ currentVolume, setCurrentVolume ] = useState(0);
 	let newMaterial = useRef('');
 	let newCount = useRef('');
+
+	let [ saveSlot, setSaveSlot ] = useState('default');
 
 	let [ error, setError ] = useState('');
 	let [ itemList, setItemList ] = useState([]);
@@ -23,7 +26,33 @@ export default () => {
 
 	useEffect(() => {
 		newMaterial.current.focus();
-	 }, []);
+
+		loadFromStore();
+	}, []);
+
+	const loadFromStore = (e) => {
+		e?.preventDefault();
+		e?.stopPropagation();
+		clearErrors();
+
+		let saveSlot = e?.currentTarget.value ?? saveSlot ?? 'default';
+
+		let key = `shipping-calc-save-${saveSlot}`;
+		let data = LocalStorageHelper.loadRecord(key);
+		if (data) {
+			setItemList(data);
+		} else {
+			setItemList([]);
+		}
+
+		setSaveSlot(saveSlot);
+	}
+
+	const saveToStore = (list) => {
+		let key = `shipping-calc-save-${saveSlot}`;
+		let data = LocalStorageHelper.saveRecord(key, list);
+		setItemList(list);
+	}
 
 	const addItem = async (e) => {
 		e.preventDefault();
@@ -31,11 +60,12 @@ export default () => {
 		clearErrors();
 
 		let addCount = parseInt(newCount.current.value);
+		let isFill = newCount.current.value.toUpperCase() === 'FILL';
 		let addMaterial = newMaterial.current.value.toUpperCase();
 
 		let previousItem = itemList.find(item => item.ticker === addMaterial) 
 		if (previousItem) {
-			let count = previousItem.amount + addCount;
+			let count = previousItem.amount + (isFill ? fillWith(previousItem.material.weight, previousItem.material.volume) : addCount);
 
 			previousItem.amount = count
 			previousItem.weight = previousItem.material.weight * count;
@@ -46,15 +76,27 @@ export default () => {
 				return setError('No material Found')
 			}
 
-			let weight = material.weight * addCount;
-			let volume = material.volume * addCount;
+			let count = isFill ? fillWith(material.weight, material.volume) : addCount;
 
-			itemList.push({ ticker: toUpper(addMaterial), amount: addCount, weight, volume, material })
+			let weight = material.weight * count;
+			let volume = material.volume * count;
+
+			itemList.push({ ticker: toUpper(addMaterial), amount: count, weight, volume, material })
 		}
 
-		setItemList([...itemList]);
+		saveToStore([...itemList]);
 		clearInputs();
 		newMaterial.current.focus();
+	}
+
+	const fillWith = (weight, volume) => {
+		let availableWeight = maxWeight - currentWeight;
+		let availableVolume = maxVolume - currentVolume;
+
+		let weightCount = Math.floor(availableWeight / weight);
+		let VolumeCount = Math.floor(availableVolume / volume);
+
+		return Math.min(weightCount, VolumeCount);
 	}
 
 	const removeItem = (i, e) => {
@@ -64,7 +106,7 @@ export default () => {
 
 		itemList.splice(i, 1);
 
-		setItemList([...itemList]);
+		saveToStore([...itemList]);
 	}
 
 	const computeCurrentValues = (itemLists) => {
@@ -85,7 +127,7 @@ export default () => {
 		clearErrors();
 		clearInputs();
 
-		setItemList([]);
+		saveToStore([]);
 	}
 
 	const clearErrors = () => {
@@ -103,7 +145,20 @@ export default () => {
 
 	return (
 		<div className='shipping-calc container mx-auto p-3'>
-			<h1 className='text-xl capitalize inline-block'>Shipping Calculator</h1>
+			<h1 className='text-xl capitalize inline-block'>
+				Shipping Calculator
+				<label htmlFor="save-slot" className="ml-10">Save Slot</label>
+				<select
+					id="save-slot"
+					defaultValue={saveSlot}
+					onChange={loadFromStore}
+				>
+					<option value='default'>Default</option>
+					<option value='s1'>Save 1</option>
+					<option value='s2'>Save 2</option>
+					<option value='s3'>Save 3</option>
+				</select>
+			</h1>
 
 			<div className='lg:flex'>
 				<div className='w-4/5 lg:mr-4'>
@@ -161,11 +216,15 @@ export default () => {
 											name='count'
 											className='mr-2'
 											required="required"
-											pattern='\d+'
+											pattern='^(\d+|[Ff]ill)$'
 											ref={newCount}
-											placeholder='i.e. 100'
-											title="Count should only be positive numbers i.e. 1, 12, 123, 1234"
+											placeholder='i.e. 100, &quot;Fill&quot;'
+											list="count-list"
+											title="Count should only be positive numbers or &quot;Fill&quot; i.e. 1, 12, 123, 1234"
 										/>
+										<datalist id="count-list">
+											<option value="Fill" />
+										</datalist>
 									</td>
 									<td>&nbsp;</td>
 									<td>&nbsp;</td>
