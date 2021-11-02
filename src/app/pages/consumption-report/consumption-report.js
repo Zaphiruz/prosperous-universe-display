@@ -52,7 +52,8 @@ const WorkForceQuery = {
 				naturalId: true
 			}
 		}
-	}
+	},
+	updatedAt: true,
 };
 
 const InventoryQuerys = {
@@ -120,6 +121,7 @@ export default () => {
 
 	const reportForLocation = ({ workforce, inventory, address, siteId }) => {
 		let workforces = workforce.workforces;
+		let updatedAt = workforce.updatedAt;
 		let needslists = workforces.map((force) => {
 			let population = force.population;
 
@@ -165,7 +167,8 @@ export default () => {
 		return {
 			address,
 			siteId,
-			needs
+			needs,
+			updatedAt,
 		}
 	}
 
